@@ -1,0 +1,73 @@
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
+
+function activity() {
+
+   return function decorator(target, name, descriptor) {
+  	let {value, get} = descriptor;  	  
+	target.isActivity = true;
+	  return {
+	    get: function getter() {
+	      const newDescriptor = { configurable: true };
+
+	      // If we are dealing with a getter
+	      if (get) {
+	        // Replace the getter with the processed one
+	        // newDescriptor.get = function(){
+	        // 	console.log("activity_getter inner",this);
+        	// 	return get();
+	        // };
+
+	        // Redefine the property on the instance with the new descriptor
+	        Object.defineProperty(this, name, newDescriptor);
+
+	        // Return the getter result
+	        return newDescriptor.get();
+	      }
+
+	      // Process the function
+	      newDescriptor.value = function(){	      	
+	      	if(this.activityMode){
+				return value.call(this,...arguments);
+				// write results in journal
+
+	      	}
+	      	else{
+		      	// give a canonical id - workflowid + internal activity counter
+	      		var dispatchId = this.newDispatchID();
+
+		      	var state = this.stateFromHistory(dispatchId);
+		      	if(state.finished){
+		      		return state.result;
+		      	}
+		      	if(state.notFound){
+		      		throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);
+		      	}
+		      	if(state.failed){
+		      		throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);
+		      	}
+		      	if(state.timedOut){
+					throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);		      		
+		      	}		      	
+		      	if(state.scheduled){
+		      		throw new WorkflowNoDecision();
+		      	}
+		      	if(state.started){
+		      		throw new WorkflowNoDecision();
+		      	}		      	
+	      	}
+	      	
+	      };
+
+	      // Redfine it on the instance with the new descriptor
+	      Object.defineProperty(this, name, newDescriptor);
+
+	      // Return the processed function
+	      return newDescriptor.value
+	    }
+	  };  	
+    
+   }
+
+}
+
+export default activity;
