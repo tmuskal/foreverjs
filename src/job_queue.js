@@ -5,13 +5,18 @@ class JobQueue {
 	putJob(job){
 		this.innerQueue.push(job);
 	}
-	getJob(cb){
+	getJob(cb, times){
+		if(!times)
+			times = 1;
 		if(this.innerQueue.length){
 			var res= this.innerQueue.pop();
 			cb(res);
 		}
 		else{
-			setTimeout(this.getJob.bind(this),100,cb);
+			if(times > 100)
+				cb();
+			else
+				setTimeout(this.getJob.bind(this),100,cb, times+1);
 		}
 	}
 }

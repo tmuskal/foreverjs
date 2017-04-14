@@ -1,10 +1,10 @@
 import journalService from './journal_service';
-import workflowFactrory from './workflow_factory';
+import workflowFactory from './workflow_factory';
 function DoDecisionTask(job){
 	// console.log("need to do decision for ", job);
 	var journal = journalService.getJournal(job.workflowId);
 	var params = journal.getEntries().find(e=>e.type == 'WorkflowStarted')	
-	var classFn = workflowFactrory[params.class];
+	var classFn = workflowFactory[params.class];
 	var instance = new classFn(job.workflowId);
 	instance.mainRun = true;	
 	try{
@@ -18,7 +18,7 @@ function DoActivityTask(job){
 	// console.log("need to do ", job);	
 	var journal = journalService.getJournal(job.workflowId);
 	var params = journal.getEntries().find(e=>e.type == 'WorkflowStarted')
-	var classFn = workflowFactrory[params.class];
+	var classFn = workflowFactory[params.class];
 	var instance = new classFn(job.workflowId);
 	var dispatchId = job.taskId;
 	var paramsActivity = journal.getEntries().find(e=>e.dispatchId == dispatchId);
@@ -34,24 +34,37 @@ function DoActivityTask(job){
 	// console.log(instance.journal.getEntries());
 	instance.scheduler.taint();
 }	
-function PeriodicDoDecisionTask(queue){
+function PeriodicDoDecisionTask(queue, worker){
+	if(worker.stop)
+		return;
+
 	queue.getJob(function(job){
-		DoDecisionTask(job);
-		setTimeout(PeriodicDoDecisionTask,10,queue);
+		if(job)
+			DoDecisionTask(job);
+		setTimeout(PeriodicDoDecisionTask,10,queue, worker);
 	});	
 }
-function PeriodicDoActivityTask(queue){
+function PeriodicDoActivityTask(queue, worker){
+	if(worker.stop)
+		return;
 	queue.getJob(function(job){		
-		DoActivityTask(job);
-		setTimeout(PeriodicDoActivityTask,10,queue);
+		if(job)
+			DoActivityTask(job);
+		setTimeout(PeriodicDoActivityTask,10,queue, worker);
 	});	
 }	
 class Worker{
-	PeriodicDoDecisionTask(queue){
-		return PeriodicDoDecisionTask(queue);
+	constructor(){
+		this.stop = false;
 	}
-	PeriodicDoActivityTask(queue){
-		return PeriodicDoActivityTask(queue);
+	runAll(){
+		var keys = Object.keys(workflowFactory);
+		for (var i = keys.length - 1; i >= 0; i--) {
+			var workflowController = workflowFactory[keys[i]];
+			var dummy = new workflowController("");
+			PeriodicDoDecisionTask(dummy.scheduler.decisionTasks,this);
+			PeriodicDoActivityTask(dummy.scheduler.activityTasks,this);
+		}
 	}
 }
 
