@@ -76,6 +76,9 @@ function workflow() {
 		  		if(state.finished){
 		  			return state.result;
 		  		}		  		
+		  		if(state.failed){
+		  			throw state.result;
+		  		}		  		
 		  		if(state.notFound){
       				await this.journal.append({type:"WorkflowStarted", date: new Date(), args:arguments, name, class:this.constructor.name, parent:this.parentWorkflow});
 		  			await this.scheduler.taint();
@@ -96,6 +99,9 @@ function workflow() {
 		  		if(state.finished){
 		  			return state.result;
 		  		}		  		
+		  		if(state.failed){
+		  			throw state.result;
+		  		}		  				  		
 		  		if(state.notFound){
       				await this.journal.append({type:"WorkflowStarted", date: new Date(), args:arguments, name, class:this.constructor.name, parent:this.parentWorkflow});
 		  			await this.scheduler.taint();
@@ -117,6 +123,9 @@ function workflow() {
 		      	if(state.notFound){
 		      		throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
 		      	}
+		  		if(state.failed){
+		  			throw state.result;
+		  		}
 		      	if(state.finished){
 		      		return state.result;
 		      	}

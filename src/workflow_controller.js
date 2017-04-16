@@ -26,6 +26,9 @@ class WorkflowController{
 			else if(entry.type == 'WorkflowComplete'){
 				state = {finished : true,result:entry.result};			
 			}
+			else if(entry.type == 'WorkflowFailed'){
+				state = {failed : true,result:entry.result};			
+			}
 		}	
 		return state;
 	}

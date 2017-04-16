@@ -73,6 +73,11 @@ var server = jayson.server({
 				case "FailedActivity":
 					needANewDecisionTask = true;
 					tasks[entry.dispatchId].failed = true;
+					if(!tasks[entry.dispatchId].failedCount){
+						tasks[entry.dispatchId].failedCount=1;
+					}
+					else 
+						tasks[entry.dispatchId].failedCount++;
 					break;
 				case "StartedActivity":
 					tasks[entry.dispatchId].started = true;
@@ -104,6 +109,11 @@ var server = jayson.server({
 					break;
 				case 'FailedChildWorkflow':
 					childWorkflows[entry.dispatchId].failed = true;
+					if(!childWorkflows[entry.dispatchId].failedCount){
+						childWorkflows[entry.dispatchId].failedCount=1;
+					}
+					else 
+						childWorkflows[entry.dispatchId].failedCount++;
 					needANewDecisionTask = true;
 					break;
 				case 'TimedOutChildWorkflow':
@@ -127,10 +137,21 @@ var server = jayson.server({
 						await instance.journal.append({type:"FinishedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
 						await instance.scheduler.taint();
 					}
-					else{
-						// console.log("result",workflowId,entry.result);
-					}
 					break;
+				case 'WorkflowFailed':
+					// release waiting callbacks
+					// needANewDecisionTask = false;										
+					// taint parent
+					if(entry.parent){
+						var classFn = workflowFactory[entry.class];
+						// console.log(classFn ,childWorkflow.class)
+						var instance = new classFn(entry.parent);
+						instance.parentWorkflow = workflowId;
+						instance.innerDispatch = true;
+						await instance.journal.append({type:"FailedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
+						await instance.scheduler.taint();
+					}
+					break;					
 			}
 		}
 		var tasksIds = Object.keys(tasks);
@@ -138,6 +159,12 @@ var server = jayson.server({
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];
 			if(task.schedule && !task.started){
+				if(tasks[taskId].failedCount > 5){
+					// fail entire workflow
+      				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' ,parent});
+					await taint(workflowId);
+					return;
+				}
 				await activityTasks.putJob({workflowId:workflowId,taskId});
 			}
 		}
@@ -147,6 +174,12 @@ var server = jayson.server({
 			var childWorkflowId = childWorkflowsIds[i];
 			var childWorkflow = childWorkflows[childWorkflowId];
 			if(childWorkflow.schedule && !childWorkflow.started){
+				if(childWorkflow.failedCount > 5){
+					// fail entire workflow
+      				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' ,parent});
+					await taint(workflowId);
+					return;
+				}				
 				// create a new workflow
 				// console.log("childWorkflow",childWorkflowId,childWorkflow);				
 				var classFn = workflowFactory[childWorkflow.class];
@@ -195,7 +228,7 @@ var server = jayson.server({
 		  			}
 		  			else{	  				
 		  				console.log(e);
-			  			await journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});
+			  			await journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});			  		
 			  			needANewDecisionTask = true;
 		  			}
 		  		}
