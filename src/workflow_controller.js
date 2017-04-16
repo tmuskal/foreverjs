@@ -1,6 +1,6 @@
 import journalService from './journal/client';
 import scheduler from './scheduler/client';
-import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision} from './workflow_signals'
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew} from './workflow_signals'
 
 class WorkflowController{
 	constructor(workflowId, activityMode){
@@ -104,5 +104,8 @@ class WorkflowController{
 		var result = await this.waitForSignal(id);
 		return await process(result,id)
 	}	
+	async continueAsNew(){
+		throw new WorkflowDecisionContinueAsNew(arguments)
+	}
 }
 export default WorkflowController;

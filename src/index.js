@@ -12,7 +12,6 @@ export {workflowFactrory, Worker, workflow, WorkflowController, activity};
 // todo: handle timeouts - main workflow - decision task start to complete, workflow schedule to complete (fail).
 // todo: handle timeouts - signals - timeout to signal
 // todo: configuration for all timeouts and retries
-// todo: handle continue as new
 // todo: workflow and activity versioning, murmur of function code?
 // todo: scheduler client. - dynamic object that proxies calls to schduler server
 // todo: client configuration for server addresses

@@ -49,6 +49,7 @@ var srv = {
 		await decisionTasks.putJob({workflowId:workflowId});
 	},	
 	taint: async function({workflowId}){
+		// console.log('in taint',workflowId);
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
@@ -133,6 +134,9 @@ var srv = {
 					break;
 				case 'WorkflowStarted':
 					parent = entry;
+					break;
+				case 'ContinueAsNew':
+					childWorkflows[entry.dispatchId] = {schedule:true,args:entry.args, name:entry.name,class:entry.class};
 					break;
 				case 'WorkflowComplete':
 					// release waiting callbacks
