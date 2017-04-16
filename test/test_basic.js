@@ -20,7 +20,12 @@ class sample extends WorkflowController{
 	@workflow()
 	async doA2(a){
 		var x = a;
-		var res = await this.doHuman({prepare:this.prepare,process:this.process,id:'human 2',payload:5})
+		var res = await this.doHuman({
+			prepare:this.prepare,
+			process:this.process,
+			id:'human 2',
+			payload:5
+		});
 		var b= await this.doB(x);
 		return res+b;
 	}	
@@ -72,7 +77,32 @@ class sample2 extends WorkflowController{
 	}
 }
 
+class softwareDevelopment extends WorkflowController{
+	@workflow()
+	async newFeatureRequest({name}){		
+		var res = await this.doHuman({
+			prepare:this.prepare,
+			process:this.process,
+			id:'human 2',
+			payload:name
+		});
+		// var aa = await this.doX();
+		return b;
+	}
 
+	@activity()
+	async process(n,id){
+	}
+
+	@activity()
+	async prepare(n,id){
+	}
+
+	@activity()
+	async do(n){
+	}
+
+}
 
 // in worker and schduler
 workflowFactrory.sample = sample;
