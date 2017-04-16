@@ -73,4 +73,8 @@ class sample2 extends WorkflowController{
 		throw new Error('not working');
 	}
 }
+
+
+schedulerClient.run({className:'sample',name:'doA',args:[5],id:'test1'});
+
 ```

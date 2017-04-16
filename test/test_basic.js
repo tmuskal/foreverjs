@@ -1,4 +1,4 @@
-import {workflowFactrory, Worker, workflow, WorkflowController, activity} from '../src';
+import {workflowFactory, Worker, workflow, WorkflowController, activity} from '../src';
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../src/workflow_signals'
 import journalService from '../src/journal/client';
 
@@ -76,26 +76,52 @@ class sample2 extends WorkflowController{
 		throw new Error('not working');
 	}
 }
-
+var t =0;
 class softwareDevelopment extends WorkflowController{
 	@workflow()
-	async newFeatureRequest({name}){		
-		var res = await this.doHuman({
-			prepare:this.prepare,
-			process:this.process,
-			id:'human 2',
-			payload:name
-		});
+	async newFeature({name}){
+		var definitions = {};
+		var i = 0;
+		while(!definitions.results){
+			var aname = name;
+			i++;
+			if(definitions.error){
+				aname = definitions.error + ", " + name
+			}
+			definitions = await this.doHuman({
+				prepare:this.prepare,
+				process:this.process,
+				id:'define_' + i,
+				payload:aname
+			});
+		}
 		// var aa = await this.doX();
-		return b;
+		return definitions.results;
 	}
-
+	fireSignal(id){		
+		t++;
+		if(t > 5)
+			this.scheduler.signal(id,"hello");
+		else
+			this.scheduler.signal(id,"hello2");
+	}
 	@activity()
 	async process(n,id){
+		if(n=="hello"){
+			return {
+				results: n
+			}			
+		}
+		else return {
+			error: "bad response"
+		}
+		return n;
 	}
 
 	@activity()
-	async prepare(n,id){
+	async prepare(description,id){
+		setTimeout(this.fireSignal.bind(this),2000,id)
+		console.log('preparing',description);
 	}
 
 	@activity()
@@ -105,9 +131,9 @@ class softwareDevelopment extends WorkflowController{
 }
 
 // in worker and schduler
-workflowFactrory.sample = sample;
-workflowFactrory.sample2 = sample2;
-
+workflowFactory.sample = sample;
+workflowFactory.sample2 = sample2;
+workflowFactory.softwareDevelopment = softwareDevelopment
 import jobQueueServer from '../src/job_queue/server';
 import journalServer from '../src/journal/server';
 import schedulerServer from '../src/scheduler/server';
@@ -122,10 +148,17 @@ function stopAll(){
 }
 
 // dispatcher (gateway - this is exposed in a remote client)
+async function testSimple3(){
+	var dt = new Date();	
+	var y = await schedulerClient.run({className:'softwareDevelopment',name:'newFeature',args:[{name:"new f1"}],id:'test1' + dt});
+	console.log("y = ",y);
+	stopAll();
+}
 async function testSimple2(){
 	var dt = new Date();	
 	var y = await schedulerClient.run({className:'sample',name:'doA',args:[5],id:'test1' + dt});
 	console.log("y = ",y);
 	stopAll();
 }
-testSimple2().catch((err)=>console.log('got error', err));
+// testSimple2().catch((err)=>console.log('got error', err));
+testSimple3().catch((err)=>console.log('got error', err));
