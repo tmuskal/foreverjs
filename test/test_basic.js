@@ -66,11 +66,6 @@ function stopAll(){
 	jobQueueServer.close();
 }
 
-function delay(time) {
-  return new Promise(function (fulfill) {
-    setTimeout(fulfill, time);
-  });
-}
 // dispatcher (gateway - this is exposed in a remote client)
 async function testSimple2(){
 	var dt = new Date();
