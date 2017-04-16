@@ -13,8 +13,8 @@ class sample extends WorkflowController{
 		var d= await this.doA2(x);
 		var wf2 = new sample2(this.newDispatchID());
 		var e= await wf2.doA3(x*2 + d);
-		console.log("e",e)
-		await this.continueAsNew(a+1);
+		// await this.sleep(2);
+		// await this.continueAsNew(a+1);
 		return e;
 	}
 	@workflow()
