@@ -57,6 +57,7 @@ import jobQueueServer from '../src/job_queue/server';
 import journalServer from '../src/journal/server';
 import schedulerServer from '../src/scheduler/server';
 import worker from '../src/workers/server';
+import schedulerClient from '../src/scheduler/client';
 
 function stopAll(){
 	worker.stop = true;
@@ -70,28 +71,11 @@ function delay(time) {
     setTimeout(fulfill, time);
   });
 }
-var dt = new Date();
 // dispatcher (gateway - this is exposed in a remote client)
-async function testSimple(){	
-	try{
-		var x = new sample("test1id-" + dt);
-		x.mainDispatch = true;
-		var y = await x.doA(5);
-		console.log("y = ",y);
-		setTimeout(stopAll,1000);
-		return y;
-	}
-	catch(e){
-		// console.log(e);
-		if (e instanceof WorkflowDecision) {
-			await delay(1000);
-			return await testSimple();
-		}
-		throw e;
-	}
-}
-
 async function testSimple2(){
-	return await testSimple();
+	var dt = new Date();
+	var y = await schedulerClient.run({className:'sample',name:'doA',args:[5],id:'test1' + dt});
+	console.log("y = ",y);
+	stopAll();
 }
 testSimple2();

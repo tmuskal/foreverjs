@@ -1,7 +1,15 @@
 import journalService from '../journal/client';
+import workflowFactory from '../workflow_factory';
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
 import JobQueueServer from '../job_queue/client';
 const jayson = require('jayson/promise');
 var client = jayson.client.http('http://localhost:4003');
+function delay(time) {
+  return new Promise(function (fulfill) {
+    setTimeout(fulfill, time);
+  });
+}
+
 class Scheduler{	
 	constructor(workflowId){
 		this.workflowId = workflowId;
@@ -9,9 +17,7 @@ class Scheduler{
 		this.decisionTasks = JobQueueServer.getJobQueue("decisions");
 		this.activityTasks = JobQueueServer.getJobQueue("activities");				
 	}
-	async run({className,name,args}){
-		
-	}
+
 	async taint(){
 		return (await client.request('taint', {workflowId:this.workflowId})).result;
 	}	
@@ -26,6 +32,24 @@ class SchedulerService{
 			this.schedulers[id] = scheduler = new Scheduler(id);
 		}
 		return scheduler;
-	}	
+	}
+	async run({className,name,args,id}){
+		try{
+			var dt = new Date();
+			var classFn = workflowFactory[className];
+			var workflow = new classFn(id);
+			workflow.mainDispatch = true;
+			return await workflow[name](...args);
+		}
+		catch(e){
+			// console.log(e);
+			if (e instanceof WorkflowDecision) {
+				await delay(1000);
+				return await this.run({className,name,args,id});
+			}
+			throw e;
+		}
+		
+	}
 }
 export default new SchedulerService();

@@ -4,7 +4,7 @@ const innerQueues = {};
 
 var server = jayson.server({
 	putJob: async function({job,id}){
-		console.log("putJob",id,job)
+		// console.log("putJob",id,job)
 		var innerQueue = innerQueues[id];
 		if(!innerQueue){
 			innerQueue = [];
@@ -13,7 +13,7 @@ var server = jayson.server({
 		innerQueue.push(job);
 	},
 	getJob: async function({id}){	
-		console.log("getJob", id)	
+		// console.log("getJob", id)	
 		var innerQueue = innerQueues[id];
 		if(innerQueue && innerQueue.length){
 			var res= innerQueue.pop();
