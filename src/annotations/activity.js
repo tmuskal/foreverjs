@@ -23,11 +23,11 @@ function activity() {
 	        // Return the getter result
 	        return newDescriptor.get();
 	      }
-
-	      // Process the function
-	      newDescriptor.value = function(){	      	
+	      const theFunc = async function(){	      	
 	      	if(this.activityMode){
-				return value.call(this,...arguments);
+	      		var res = await value.call(this,...arguments);
+	      		// console.log("activity res",res,arguments);
+				return res;
 				// write results in journal
 
 	      	}
@@ -35,7 +35,7 @@ function activity() {
 		      	// give a canonical id - workflowid + internal activity counter
 	      		var dispatchId = this.newDispatchID();
 
-		      	var state = this.stateFromHistory(dispatchId);
+		      	var state = await this.stateFromHistory(dispatchId);
 		      	if(state.finished){
 		      		return state.result;
 		      	}
@@ -57,6 +57,8 @@ function activity() {
 	      	}
 	      	
 	      };
+	      // Process the function
+	      newDescriptor.value = theFunc.bind(this);
 
 	      // Redfine it on the instance with the new descriptor
 	      Object.defineProperty(this, name, newDescriptor);

@@ -1,19 +1,23 @@
-import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from './workflow_signals'
-import JobQueue  from './job_queue';
-import workflowFactrory from './workflow_factory';
-var decisionTasks = new JobQueue();
-var activityTasks = new JobQueue();
+const jayson = require('jayson/promise');
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
+import JobQueueServer  from '../job_queue/client';
+import workflowFactrory from '../workflow_factory';
+import journalService from '../journal/client';
 
-class Scheduler{
-	constructor(workflowId,journalService){
-		this.workflowId = workflowId;
-		this.journal = journalService.getJournal(workflowId);
-		this.decisionTasks = decisionTasks;
-		this.activityTasks = activityTasks;
-	}
-	taint(){
-		var entries = this.journal.getEntries();
-		// console.log("journal",entries);
+
+var server = jayson.server({
+	// constructor(workflowId,journalService){
+	// 	this.workflowId = workflowId;
+	// 	this.journal = journalService.getJournal(workflowId);
+	// 	this.decisionTasks = JobQueueServer.getJobQueue("decisions");
+	// 	this.activityTasks = JobQueueServer.getJobQueue("activities");		
+	// }
+	taint: async function({workflowId}){
+		var decisionTasks = JobQueueServer.getJobQueue("decisions");
+		var activityTasks = JobQueueServer.getJobQueue("activities");
+	    var journal = journalService.getJournal(workflowId);
+
+		var entries = await journal.getEntries();
 		// add schedule if last activity completed or failed
 		var tasks = {}
 		var childWorkflows = {}
@@ -81,13 +85,13 @@ class Scheduler{
 						var classFn = workflowFactrory[entry.class];
 						// console.log(classFn ,childWorkflow.class)
 						var instance = new classFn(entry.parent);
-						instance.parentWorkflow = this.workflowId;
+						instance.parentWorkflow = workflowId;
 						instance.innerDispatch = true;
-						instance.journal.append({type:"FinishedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
-						instance.scheduler.taint();
+						await instance.journal.append({type:"FinishedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
+						await instance.scheduler.taint();
 					}
 					else{
-						// console.log("result",this.workflowId,entry.result);
+						// console.log("result",workflowId,entry.result);
 					}
 					break;
 			}
@@ -97,7 +101,7 @@ class Scheduler{
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];
 			if(task.schedule && !task.started){
-				this.activityTasks.putJob({workflowId:this.workflowId,taskId});
+				await activityTasks.putJob({workflowId:workflowId,taskId});
 			}
 		}
 
@@ -112,12 +116,12 @@ class Scheduler{
 
 				// console.log(classFn ,childWorkflow.class)
 				var instance = new classFn(childWorkflowId);
-				instance.parentWorkflow = this.workflowId;
+				instance.parentWorkflow = workflowId;
 				instance.innerDispatch = true;
 
-		  		this.journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
-		  		try{	  			
-					var res = instance[childWorkflow.name](...childWorkflow.args);
+		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
+		  		try{	  
+					await instance[childWorkflow.name](...Object.values(childWorkflow.args));
 
 					// console.log("res", res);
       				// instance.journal.append({type:"WorkflowComplete", date: new Date(), result:res,name:childWorkflow.name,class:childWorkflow.class,id:childWorkflowId,parent:this.workflowId});
@@ -136,11 +140,11 @@ class Scheduler{
 				    	}
 				    	if (e instanceof WorkflowDecisionScheduleActivity) {
 				    		// add to journal
-				    		instance.journal.append({type:"ScheduleActivity", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name});
+				    		await instance.journal.append({type:"ScheduleActivity", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name});
 				    	}
 				    	else if(e instanceof WorkflowDecisionScheduleWorkflow){
 				    		// add to journal
-				    		instance.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
+				    		await instance.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
 				    	}
 				    	// current decisionTask execution id
 				    	// this.journal.append({type:"DecisionTaskComplete", date: new Date()});
@@ -149,7 +153,8 @@ class Scheduler{
 		  				// throw e;
 		  			}
 		  			else{	  				
-			  			this.journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});
+		  				console.log(e);
+			  			await journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});
 			  			needANewDecisionTask = true;
 		  			}
 		  		}
@@ -158,8 +163,8 @@ class Scheduler{
 			}
 		}
 		if(needANewDecisionTask){
-		  	this.journal.append({type:"DecisionTaskSchedule", date: new Date()});	
-			this.decisionTasks.putJob({workflowId:this.workflowId});
+		  	await journal.append({type:"DecisionTaskSchedule", date: new Date()});
+			await decisionTasks.putJob({workflowId:workflowId});
 		}
 
 		// can be done periodically
@@ -173,8 +178,10 @@ class Scheduler{
 	// fails
 	// complete activity
 	// timeouts
-	// 
-}
+	
+});
 
 
-export default Scheduler;
+const http = server.http()
+http.listen(4003);
+export default http;

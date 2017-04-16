@@ -1,5 +1,5 @@
-import journalService from './journal_service';
-import Scheduler from './scheduler';
+import journalService from './journal/client';
+import scheduler from './scheduler/client';
 
 class WorkflowController{
 	constructor(workflowId, activityMode){
@@ -7,11 +7,11 @@ class WorkflowController{
 		this.lastDispatchId = 0;
 		this.activityMode = activityMode;
 		this.journal = journalService.getJournal(workflowId);
-		this.scheduler = new Scheduler(workflowId, journalService);
+		this.scheduler = scheduler.getScheduler(workflowId);
 	}
-	workflowStateFromHistory(journal){
+	async workflowStateFromHistory(journal){
 		var journal = journal || this.journal;		
-		var entries = journal.getEntries();
+		var entries = await journal.getEntries();
 		var state = {notFound : true};
 
 		var timedOut = 0;
@@ -20,7 +20,7 @@ class WorkflowController{
 			var entry = entries[i];
 				// if schedule event, set state to scheduled
 			if(entry.type == 'WorkflowStarted'){
-				state = {scheduled : true, name:entry.name, args:entry.args};
+				state = {started : true, name:entry.name, args:entry.args};
 			}
 			else if(entry.type == 'WorkflowComplete'){
 				state = {finished : true,result:entry.result};			
@@ -28,9 +28,9 @@ class WorkflowController{
 		}	
 		return state;
 	}
-	stateFromHistory(dispatchId, journal){
+	async stateFromHistory(dispatchId, journal){
 		var journal = journal || this.journal;
-		var entries = journal.getEntries();
+		var entries = await journal.getEntries();
 		var state = {notFound : true};
 		var timedOut = 0;
 		var failures = 0;

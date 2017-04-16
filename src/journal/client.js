@@ -1,14 +1,16 @@
+const jayson = require('jayson/promise');
+var client = jayson.client.http('http://localhost:4001');
+
 class Journal{
 	constructor(id){
-		this.entries = [];
 		this.id = id;
 	}
-	getEntries(){
-		return this.entries;
+	async getEntries(){
+		return (await client.request('getEntries', {id:this.id})).result;
 	}	
 	append(entry){
 		// console.log("journal:",this.id,entry);
-		this.entries.push(entry);
+		return client.request('append',{entry, id:this.id});
 	}
 }
 class JournalService{

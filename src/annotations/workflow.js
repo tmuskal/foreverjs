@@ -1,5 +1,5 @@
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
-import journalService from '../journal_service';
+import journalService from '../journal/client';
 
 function workflow() {
    return function decorator(target, name, descriptor) {
@@ -20,21 +20,19 @@ function workflow() {
 	        // Return the getter result
 	        return newDescriptor.get();
 	      }
-
-	      // Process the function
-		  newDescriptor.value = function(){
-		  	
+	      const theFunc = async function(){
 		  	// if main dispatch, mark main dispatch false and run		  	 
 		  	if(this.mainRun){
+
 		  		this.mainRun = false;
-		  		this.journal.append({type:"DecisionTaskStarted", date: new Date()});
+		  		await this.journal.append({type:"DecisionTaskStarted", date: new Date()});
 			  	try{
-		      		var res = value.call(this,...arguments);
-			    	this.journal.append({type:"DecisionTaskComplete", date: new Date()});
-			    	var parent = this.journal.getEntries().find(e=>e.type === 'WorkflowStarted').parent;
-      				this.journal.append({type:"WorkflowComplete", date: new Date(), result:res,name:name,class:this.constructor.name,id:this.workflowId,parent});
+		      		var res = await value.call(this,...arguments);
+			    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
+			    	var parent = (await this.journal.getEntries()).find(e=>e.type === 'WorkflowStarted').parent;
+      				await this.journal.append({type:"WorkflowComplete", date: new Date(), result:res,name:name,class:this.constructor.name,id:this.workflowId,parent});
 		    		// notify scheduler
-		    		this.scheduler.taint();
+		    		await this.scheduler.taint();
 			  	}
 			  	catch(e){
 			  		// console.log(e);
@@ -43,25 +41,25 @@ function workflow() {
 				    	}
 				    	if (e instanceof WorkflowDecisionScheduleActivity) {
 				    		// add to journal
-				    		this.journal.append({type:"ScheduleActivity", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name});
+				    		await this.journal.append({type:"ScheduleActivity", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name});
 				    	}
 				    	else if(e instanceof WorkflowDecisionScheduleWorkflow){
 				    		// add to journal
-				    		this.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
+				    		await this.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
 				    	}
 				    	// current decisionTask execution id
-				    	this.journal.append({type:"DecisionTaskComplete", date: new Date()});
+				    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
 						// notify scheduler		
-				    	this.scheduler.taint();
+				    	await this.scheduler.taint();
 						// complete decision task
 				    	return e;
 				        // statements to handle TypeError exceptions
 				    } else {
 				    	console.log('real error',e);
 				    	// mark failed
-				    	this.journal.append({type:"DecisionTaskFailed", date: new Date(),error:e});
+				    	await this.journal.append({type:"DecisionTaskFailed", date: new Date(),error:e});
 						// notify scheduler		
-						this.scheduler.taint();
+						await this.scheduler.taint();
 				    	throw e;
 				    }
 			  	}		  		
@@ -69,14 +67,13 @@ function workflow() {
 		  	else if(this.mainDispatch){
 		  		// from test and api gateway.
 		  		this.mainDispatch = false;
-		  		var state = this.workflowStateFromHistory();
-		  		// console.log("state",state);
+		  		var state = await this.workflowStateFromHistory();
 		  		if(state.finished){
 		  			return state.result;
 		  		}		  		
 		  		if(state.notFound){
-      				this.journal.append({type:"WorkflowStarted", date: new Date(), args:arguments, name, class:this.constructor.name, parent:this.parentWorkflow});
-		  			this.scheduler.taint();
+      				await this.journal.append({type:"WorkflowStarted", date: new Date(), args:arguments, name, class:this.constructor.name, parent:this.parentWorkflow});
+		  			await this.scheduler.taint();
 		  			throw new WorkflowNoDecision();
 		  		}
 		  		if(state.started){
@@ -89,14 +86,14 @@ function workflow() {
 		  		// from test and api gateway.
 		  		// write to journal
 		  		// this.innerDispatch = false;
-		  		var state = this.workflowStateFromHistory();
+		  		var state = await this.workflowStateFromHistory();
 		  		// console.log("state3",state);
 		  		if(state.finished){
 		  			return state.result;
 		  		}		  		
 		  		if(state.notFound){
-      				this.journal.append({type:"WorkflowStarted", date: new Date(), args:arguments, name, class:this.constructor.name, parent:this.parentWorkflow});
-		  			this.scheduler.taint();
+      				await this.journal.append({type:"WorkflowStarted", date: new Date(), args:arguments, name, class:this.constructor.name, parent:this.parentWorkflow});
+		  			await this.scheduler.taint();
 		  			throw new WorkflowNoDecision();
 		  		}
 		  		if(state.started){
@@ -106,10 +103,11 @@ function workflow() {
 		  	else{		  				  		
 		  		// child workflow
 	      		var dispatchId = this.newDispatchID();	   
-		      	var parent = journalService.getJournal(dispatchId).getEntries().find(e=>e.type === 'WorkflowStarted'); 
+	      		var entries = await journalService.getJournal(dispatchId).getEntries();
+		      	var parent = entries.find(e=>e.type === 'WorkflowStarted'); 
 		      	if(parent)
-		      		parent = parent.parent;
-		      	var state = this.stateFromHistory(dispatchId, journalService.getJournal(parent || dispatchId));
+		      		parent = parent.parent;		      	
+		      	var state = await this.stateFromHistory(dispatchId, journalService.getJournal(parent || dispatchId));
 		      	// console.log("state2",state, dispatchId,this.workflowId,parent);
 		      	if(state.notFound){
 		      		throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
@@ -123,6 +121,8 @@ function workflow() {
 		  		// throw new Error("not implemented");
 		  	}
 	      };
+	      // Process the function	      
+		  newDescriptor.value = theFunc.bind(this);
 	      // Redfine it on the instance with the new descriptor
 	      Object.defineProperty(this, name, newDescriptor);
 
