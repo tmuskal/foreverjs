@@ -15,7 +15,7 @@ export {workflowFactrory, Worker, workflow, WorkflowController, activity};
 // todo: workflow and activity versioning, murmur of function code?
 // todo: scheduler client. - dynamic object that proxies calls to schduler server
 // todo: client configuration for server addresses
-// todo: discover recovering processes (timers) in scheduler start
+// todo: discover recovering processes (timers, active journals) in scheduler start
 // todo: workers - different queues.
 // todo: exports, register, package, deploy - jsforever, better name.
 // todo: make deployment with custom workflow easy. - discovery with scheduler, etc.
