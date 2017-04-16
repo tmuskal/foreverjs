@@ -19,4 +19,7 @@ var server = jayson.server({
 			entries[id].push(entry);
 	}
 });
-server.http().listen(4001);
+
+const http = server.http()
+http.listen(4001);
+export default http;

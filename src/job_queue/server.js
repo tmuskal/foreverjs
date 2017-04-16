@@ -28,4 +28,7 @@ var server = jayson.server({
 		}
 	}
 });
-server.http().listen(4002);
+
+const http = server.http()
+http.listen(4002);
+export default http;

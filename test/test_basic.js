@@ -47,18 +47,22 @@ class sample2 extends WorkflowController{
 	}
 }
 
+
+
 // in worker and schduler
 workflowFactrory.sample = sample;
 workflowFactrory.sample2 = sample2;
 
+import jobQueueServer from '../src/job_queue/server';
+import journalServer from '../src/journal/server';
 import schedulerServer from '../src/scheduler/server';
-
-const worker = new Worker();
-worker.runAll();
+import worker from '../src/workers/server';
 
 function stopAll(){
 	worker.stop = true;
+	journalServer.close();
 	schedulerServer.close();
+	jobQueueServer.close();
 }
 
 function delay(time) {

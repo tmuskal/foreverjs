@@ -117,10 +117,10 @@ var server = jayson.server({
 				// console.log(classFn ,childWorkflow.class)
 				var instance = new classFn(childWorkflowId);
 				instance.parentWorkflow = workflowId;
-				instance.innerDispatch = true;
 
 		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
 		  		try{	  
+					instance.innerDispatch = true;
 					await instance[childWorkflow.name](...Object.values(childWorkflow.args));
 
 					// console.log("res", res);

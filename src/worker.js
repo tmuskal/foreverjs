@@ -1,6 +1,12 @@
 import journalService from './journal/client';
 import workflowFactory from './workflow_factory';
 import jobQueue from './job_queue/client';
+function delay(time) {
+  return new Promise(function (fulfill) {
+    setTimeout(fulfill, time);
+  });
+}
+
 async function DoDecisionTask(job){
 	// console.log("need to do decision for ", job);
 	
@@ -44,7 +50,8 @@ async function PeriodicDoDecisionTask(queue, worker){
 	var job = await queue.getJob();
 	if(job)
 		await DoDecisionTask(job);
-	setTimeout(PeriodicDoDecisionTask,100,queue, worker);
+	await delay(100)
+	PeriodicDoDecisionTask(queue, worker);
 }
 async function PeriodicDoActivityTask(queue, worker){
 	if(worker.stop)
@@ -52,18 +59,18 @@ async function PeriodicDoActivityTask(queue, worker){
 	var job = await queue.getJob();
 	if(job)
 		await DoActivityTask(job);
-	setTimeout(PeriodicDoActivityTask,100,queue, worker);
+	await delay(100)
+	PeriodicDoActivityTask(queue, worker);
 }	
 class Worker{
 	constructor(){
-		this.stop = false;
 	}
 	async runAll(){
-		var keys = Object.keys(workflowFactory);
-		for (var i = keys.length - 1; i >= 0; i--) {		
-			await PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
-			await PeriodicDoActivityTask(jobQueue.getJobQueue("activities"),this);
-		}
+		// var keys = Object.keys(workflowFactory);
+		// for (var i = keys.length - 1; i >= 0; i--) {	
+			PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
+			PeriodicDoActivityTask(jobQueue.getJobQueue("activities"),this);
+		// }
 	}
 }
 
