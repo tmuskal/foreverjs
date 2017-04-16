@@ -8,9 +8,6 @@ import workflowFactrory from './workflow_factory';
 
 export {workflowFactrory, Worker, workflow, WorkflowController, activity};
 
-// todo: handle fails and retries, activities - test
-// todo: main workflow fail or completed.
-// todo: handle fails and retries, child flows.
 // todo: handle timeouts - task - schedule to start. schedule to complete. start to complete. heatbeat.
 // todo: handle timeouts - main workflow - decision task start to complete, workflow schedule to complete (fail).
 // todo: handle timeouts - signals - timeout to signal
