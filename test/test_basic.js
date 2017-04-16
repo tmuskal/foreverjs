@@ -1,4 +1,4 @@
-import {workflowFactrory, Worker, humanActivity,workflow, WorkflowController, activity} from '../src';
+import {workflowFactrory, Worker, workflow, WorkflowController, activity} from '../src';
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../src/workflow_signals'
 import journalService from '../src/journal/client';
 
@@ -26,13 +26,6 @@ class sample extends WorkflowController{
 	@activity()
 	async doB(n){
 		return n * n;
-	}
-	@humanActivity()
-	doReadFilledForm(resultFile){
-		return {
-			prepare: async () => {}, // put form online, notify (open ticket), can fall back to default 
-			process: async () => {} // after received completion signal. can fall back to default
-		}
 	}
 }
 

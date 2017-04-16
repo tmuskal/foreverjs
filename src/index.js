@@ -9,7 +9,6 @@ import workflowFactrory from './workflow_factory';
 
 export {workflowFactrory, Worker, humanActivity,workflow, WorkflowController, activity};
 
-// todo: handle signals - test
 // todo: discover recovering processes (timers) in scheduler start
 // todo: handle humanActivities (task + wait for signal + task)
 // todo: handle timeouts

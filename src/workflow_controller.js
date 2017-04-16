@@ -81,7 +81,7 @@ class WorkflowController{
 		if(timeLeft <= 0){
 			// should be moved to scheduler
 			// should add have new decision task.						
-			await this.journal.append({type:"TimerFired", date: new Date(),timerId});
+			// await this.journal.append({type:"TimerFired", date: new Date(),timerId});
 			return;
 		}
 		else{
