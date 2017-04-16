@@ -29,7 +29,6 @@ function taint(id){
 	return server.taint(id);
 }
 
-// todo: discover recovering processes. (timers)
 
 var server = jayson.server({
 	run:async function ({className,name,args,id}){
@@ -46,7 +45,9 @@ var server = jayson.server({
 	signal:async function ({workflowId, signalId,result}){
 	    var journal = journalService.getJournal(workflowId);
 		await journal.append({type:"SignalFired", date: new Date(), result ,signalId});		
-		await taint(workflowId);
+		await journal.append({type:"DecisionTaskSchedule", date: new Date()});
+		var decisionTasks = JobQueueServer.getJobQueue("decisions");
+		await decisionTasks.putJob({workflowId:workflowId});
 	},	
 	taint: async function({workflowId}){
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");

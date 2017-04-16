@@ -88,8 +88,7 @@ class WorkflowController{
 			throw new WorkflowNoDecision();
 		}
 	}
-	async waitForSignal(){
-		var signalId = this.newDispatchID();
+	async waitForSignal(signalId){
 		var entries = await this.journal.getEntries();
 		var signalFire = entries.find(e=>e.type === 'SignalFired' && e.signalId == signalId);
 		if(signalFire){

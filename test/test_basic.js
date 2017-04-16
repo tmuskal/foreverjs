@@ -8,7 +8,7 @@ class sample extends WorkflowController{
 	async doA(a){
 		var x = a;
 		this.a = 4;
-		await this.sleep(10);
+		await this.sleep(2);
 		var b =  await this.doB(x);
 		b = await this.doB(b);
 		var c = await this.doReadFilledForm(a,b);
@@ -35,15 +35,21 @@ class sample extends WorkflowController{
 		}
 	}
 }
+
 class sample2 extends WorkflowController{
 	@workflow()
 	async doA3(a){
 		var x = a;
 		var b = await this.doB5(x);
+		var m = await this.waitForSignal("human 1");
 		return b;
 	}	
+	fireSignal(){
+		this.scheduler.signal("human 1","hello");
+	}
 	@activity()
 	async doB5(n){
+		setTimeout(this.fireSignal.bind(this),2000)
 		return n * n;
 	}
 }
