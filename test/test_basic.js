@@ -2,14 +2,7 @@ import {workflowFactrory, Worker, workflow, WorkflowController, activity} from '
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../src/workflow_signals'
 import journalService from '../src/journal/client';
 
-class humanWorkflow extends WorkflowController{
-	async doHuman({prepare,process,payload, id}){
-		await prepare(payload,id)		
-		var result = await this.waitForSignal(id);
-		return await process(result,id)
-	}
-}
-class sample extends humanWorkflow{
+class sample extends WorkflowController{
 	@workflow()
 	async doA(a){
 		var x = a;
@@ -53,7 +46,7 @@ class sample extends humanWorkflow{
 	}	
 }
 
-class sample2 extends humanWorkflow{
+class sample2 extends WorkflowController{
 	@workflow()
 	async doA3(a){
 		var x = a;

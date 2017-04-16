@@ -96,5 +96,10 @@ class WorkflowController{
 		}
 		throw new WorkflowNoDecision();
 	}
+	async doHuman({prepare,process,payload, id}){
+		await prepare(payload,id)		
+		var result = await this.waitForSignal(id);
+		return await process(result,id)
+	}	
 }
 export default WorkflowController;
