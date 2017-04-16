@@ -2,8 +2,14 @@ import {workflowFactrory, Worker, workflow, WorkflowController, activity} from '
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../src/workflow_signals'
 import journalService from '../src/journal/client';
 
-
-class sample extends WorkflowController{
+class humanWorkflow extends WorkflowController{
+	async doHuman({prepare,process,payload, id}){
+		await prepare(payload,id)		
+		var result = await this.waitForSignal(id);
+		return await process(result,id)
+	}
+}
+class sample extends humanWorkflow{
 	@workflow()
 	async doA(a){
 		var x = a;
@@ -11,25 +17,43 @@ class sample extends WorkflowController{
 		await this.sleep(2);
 		var b =  await this.doB(x);
 		b = await this.doB(b);
-		var c = await this.doReadFilledForm(a,b);
 		var d= await this.doA2(x);
 		var wf2 = new sample2(this.newDispatchID());
-		var e= await wf2.doA3(x*2);
+		var e= await wf2.doA3(x*2 + d);
 		return e;
 	}
 	@workflow()
 	async doA2(a){
 		var x = a;
-		var b = await this.doB(x);
-		return b;
+		var res = await this.doHuman({prepare:this.prepare,process:this.process,id:'human 2',payload:5})
+		var b= await this.doB(x);
+		return res+b;
+	}	
+	fireSignal(n,id){
+		console.log("firing ", id, n);
+		this.scheduler.signal(id,n);
 	}	
 	@activity()
 	async doB(n){
 		return n * n;
 	}
+
+	@activity()
+	async process(n,id){
+		console.log("processing", n,id);
+		return n * n;
+	}
+
+	@activity()
+	async prepare(n,id){
+		console.log("preparing", n , id);
+		setTimeout(this.fireSignal.bind(this),5000,n,id);
+		// do something
+		return;
+	}	
 }
 
-class sample2 extends WorkflowController{
+class sample2 extends humanWorkflow{
 	@workflow()
 	async doA3(a){
 		var x = a;

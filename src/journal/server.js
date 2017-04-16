@@ -13,7 +13,7 @@ var server = jayson.server({
 			}
 	},	
 	append: async function({entry,id}){
-			console.log("journal:",id,entry);
+			// console.log("journal:",id,entry);
 			if(!entries[id])
 				entries[id] = [];
 			entries[id].push(entry);
