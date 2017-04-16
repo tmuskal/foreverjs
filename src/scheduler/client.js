@@ -4,11 +4,6 @@ import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionSchedu
 import JobQueueServer from '../job_queue/client';
 const jayson = require('jayson/promise');
 var client = jayson.client.http('http://localhost:4003');
-function delay(time) {
-  return new Promise(function (fulfill) {
-    setTimeout(fulfill, time);
-  });
-}
 
 class Scheduler{	
 	constructor(workflowId){
@@ -17,10 +12,15 @@ class Scheduler{
 		this.decisionTasks = JobQueueServer.getJobQueue("decisions");
 		this.activityTasks = JobQueueServer.getJobQueue("activities");				
 	}
-
+	async scheduleTimer(duration,timerId){
+		return (await client.request('scheduleTimer', {workflowId:this.workflowId,duration,timerId})).result;
+	}
+	async signal(signalId,result){
+		return (await client.request('signal', {workflowId:this.workflowId,result,signalId})).result;
+	}
 	async taint(){
 		return (await client.request('taint', {workflowId:this.workflowId})).result;
-	}	
+	}
 }
 class SchedulerService{
 	constructor(){

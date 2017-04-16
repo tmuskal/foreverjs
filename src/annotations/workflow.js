@@ -1,4 +1,4 @@
-import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision} from '../workflow_signals'
 import journalService from '../journal/client';
 
 function workflow() {
@@ -47,6 +47,11 @@ function workflow() {
 				    		// add to journal
 				    		await this.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
 				    	}
+				    	else if(e instanceof WorkflowTimerDecision){
+				    		await this.journal.append({type:"TimerSetup", date: new Date(),timerId:e.timerId,duration:e.duration});
+				    		await this.scheduler.scheduleTimer(e.duration,e.timerId);
+				    	}
+
 				    	// current decisionTask execution id
 				    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
 						// notify scheduler		

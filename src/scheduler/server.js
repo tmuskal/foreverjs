@@ -17,18 +17,37 @@ async function run({className,name,args,id}){
 		return await workflow[name](...args);
 	}
 	catch(e){
-		console.log(e);
 		if (e instanceof WorkflowDecision) {
 			await delay(1000);
 			return await run({className,name,args,id});
 		}
+		console.log(e);
 		throw e;
 	}		
 }
+function taint(id){
+	return server.taint(id);
+}
+
+// todo: discover recovering processes. (timers)
+
 var server = jayson.server({
 	run:async function ({className,name,args,id}){
 		return await run({className,name,args,id});
 	},
+	scheduleTimer: async function({duration,timerId,workflowId}){
+		await delay(duration * 1000);
+	    var journal = journalService.getJournal(workflowId);		
+		await journal.append({type:"TimerFired", date: new Date(),timerId});
+		await journal.append({type:"DecisionTaskSchedule", date: new Date()});
+		var decisionTasks = JobQueueServer.getJobQueue("decisions");
+		await decisionTasks.putJob({workflowId:workflowId});
+	},
+	signal:async function ({workflowId, signalId,result}){
+	    var journal = journalService.getJournal(workflowId);
+		await journal.append({type:"SignalFired", date: new Date(), result ,signalId});		
+		await taint(workflowId);
+	},	
 	taint: async function({workflowId}){
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		var activityTasks = JobQueueServer.getJobQueue("activities");
@@ -163,6 +182,10 @@ var server = jayson.server({
 				    		// add to journal
 				    		await instance.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
 				    	}
+				    	else if(e instanceof WorkflowTimerDecision){
+				    		await instance.journal.append({type:"TimerSetup", date: new Date(),timerId:e.timerId,duration:e.duration});
+				    		await instance.scheduler.scheduleTimer(e.duration,e.timerId);
+				    	}				    	
 				    	// current decisionTask execution id
 				    	// this.journal.append({type:"DecisionTaskComplete", date: new Date()});
 						// notify scheduler		
@@ -197,7 +220,6 @@ var server = jayson.server({
 	// timeouts
 	
 });
-
 
 const http = server.http()
 http.listen(4003);

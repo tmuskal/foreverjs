@@ -1,5 +1,6 @@
 import journalService from './journal/client';
 import scheduler from './scheduler/client';
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision} from './workflow_signals'
 
 class WorkflowController{
 	constructor(workflowId, activityMode){
@@ -62,11 +63,39 @@ class WorkflowController{
 	newDispatchID(){
 		return this.workflowId +"."+ (++this.lastDispatchId);
 	}
-	sleep(){
+	async sleep(durationInSeconds){
 		// setup a timer
-	}
-	waitForSignal(){
+		var timerId = this.newDispatchID();
+		var entries = await this.journal.getEntries();
+		var timerFired = entries.find(e=>e.type === 'TimerFired' && e.timerId == timerId);
+		if(timerFired){
+			return;
+		}
 
+		var timerSetup = entries.find(e=>e.type === 'TimerSetup' && e.timerId == timerId);
+		if(!timerSetup){			
+			throw new WorkflowTimerDecision(durationInSeconds,timerId);
+		}
+		var threshold = new Date(timerSetup.date.getTime() + durationInSeconds * 1000);
+		var timeLeft = threshold.getTime() - new Date().getTime();
+		if(timeLeft <= 0){
+			// should be moved to scheduler
+			// should add have new decision task.						
+			await this.journal.append({type:"TimerFired", date: new Date(),timerId});
+			return;
+		}
+		else{
+			throw new WorkflowNoDecision();
+		}
+	}
+	async waitForSignal(){
+		var signalId = this.newDispatchID();
+		var entries = await this.journal.getEntries();
+		var signalFire = entries.find(e=>e.type === 'SignalFired' && e.signalId == signalId);
+		if(signalFire){
+			return signalFire.result;
+		}
+		throw new WorkflowNoDecision();
 	}
 }
 export default WorkflowController;

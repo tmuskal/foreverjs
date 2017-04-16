@@ -1,6 +1,14 @@
 class WorkflowSignal{};
 class WorkflowDecision extends WorkflowSignal{}
 class WorkflowNoDecision extends WorkflowDecision{}
+class WorkflowTimerDecision extends WorkflowDecision{
+	constructor(duration,timerId){
+		super()
+		this.duration = duration;
+		this.timerId = timerId;
+
+	}	
+}
 class WorkflowDecisionScheduleActivity extends WorkflowDecision{
 	constructor(dispatchId,name,args){
 		super()
@@ -21,4 +29,4 @@ class WorkflowDecisionScheduleWorkflow extends WorkflowDecision{
 }
 
 
-export {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision}
+export {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision}

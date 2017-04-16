@@ -8,6 +8,7 @@ class sample extends WorkflowController{
 	async doA(a){
 		var x = a;
 		this.a = 4;
+		await this.sleep(10);
 		var b =  await this.doB(x);
 		b = await this.doB(b);
 		var c = await this.doReadFilledForm(a,b);
