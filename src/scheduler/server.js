@@ -6,12 +6,12 @@ import journalService from '../journal/client';
 
 
 var server = jayson.server({
-	// constructor(workflowId,journalService){
-	// 	this.workflowId = workflowId;
-	// 	this.journal = journalService.getJournal(workflowId);
-	// 	this.decisionTasks = JobQueueServer.getJobQueue("decisions");
-	// 	this.activityTasks = JobQueueServer.getJobQueue("activities");		
-	// }
+	run:async function ({className,name,args}){
+		
+	},
+	getStatus:async function ({id}){
+		
+	},
 	taint: async function({workflowId}){
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		var activityTasks = JobQueueServer.getJobQueue("activities");

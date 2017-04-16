@@ -9,7 +9,6 @@ import workflowFactrory from './workflow_factory';
 
 export {workflowFactrory, Worker, humanActivity,workflow, WorkflowController, activity};
 
-// todo: support promises
 // todo: persist journal server
 // todo: workers
 // handle decision task scheduling and journal
@@ -22,8 +21,8 @@ export {workflowFactrory, Worker, humanActivity,workflow, WorkflowController, ac
 // todo: handle continue as new
 // todo: handle humanActivities (task + wait for signal + task)
 // todo: workflow and activity versioning
-// todo: gateway server - get params, class and function name. should return workflowid. another handler for getresults/status of a running job.
-// todo: gateway client. - dynamic object that proxies calls to gateway server
+// todo: scheduler - get params, class and function name. should return workflowid. another handler for getresults/status of a running job.
+// todo: scheduler client. - dynamic object that proxies calls to schduler server
 // todo: make deployment with custom workflow easy. - discovery with scheduler, etc.
 // todo: parallel jobs
 // todo: exports, register, package, deploy - jsforever, better name.

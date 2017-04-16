@@ -2,12 +2,15 @@ import journalService from '../journal/client';
 import JobQueueServer from '../job_queue/client';
 const jayson = require('jayson/promise');
 var client = jayson.client.http('http://localhost:4003');
-class Scheduler{
+class Scheduler{	
 	constructor(workflowId){
 		this.workflowId = workflowId;
 		this.journal = journalService.getJournal(workflowId);
 		this.decisionTasks = JobQueueServer.getJobQueue("decisions");
 		this.activityTasks = JobQueueServer.getJobQueue("activities");				
+	}
+	async run({className,name,args}){
+		
 	}
 	async taint(){
 		return (await client.request('taint', {workflowId:this.workflowId})).result;
