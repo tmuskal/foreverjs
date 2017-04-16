@@ -34,21 +34,7 @@ class SchedulerService{
 		return scheduler;
 	}
 	async run({className,name,args,id}){
-		try{
-			var dt = new Date();
-			var classFn = workflowFactory[className];
-			var workflow = new classFn(id);
-			workflow.mainDispatch = true;
-			return await workflow[name](...args);
-		}
-		catch(e){
-			// console.log(e);
-			if (e instanceof WorkflowDecision) {
-				await delay(1000);
-				return await this.run({className,name,args,id});
-			}
-			throw e;
-		}
+		return (await client.request('run', {className,name,args,id})).result;
 		
 	}
 }

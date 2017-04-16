@@ -1,16 +1,33 @@
 const jayson = require('jayson/promise');
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
 import JobQueueServer  from '../job_queue/client';
-import workflowFactrory from '../workflow_factory';
+import workflowFactory from '../workflow_factory';
 import journalService from '../journal/client';
+function delay(time) {
+  return new Promise(function (fulfill) {
+    setTimeout(fulfill, time);
+  });
+}
 
-
+async function run({className,name,args,id}){
+	try{
+		var classFn = workflowFactory[className];
+		var workflow = new classFn(id);
+		workflow.mainDispatch = true;
+		return await workflow[name](...args);
+	}
+	catch(e){
+		console.log(e);
+		if (e instanceof WorkflowDecision) {
+			await delay(1000);
+			return await run({className,name,args,id});
+		}
+		throw e;
+	}		
+}
 var server = jayson.server({
-	run:async function ({className,name,args}){
-		
-	},
-	getStatus:async function ({id}){
-		
+	run:async function ({className,name,args,id}){
+		return await run({className,name,args,id});
 	},
 	taint: async function({workflowId}){
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
@@ -82,7 +99,7 @@ var server = jayson.server({
 					// needANewDecisionTask = false;										
 					// taint parent
 					if(entry.parent){
-						var classFn = workflowFactrory[entry.class];
+						var classFn = workflowFactory[entry.class];
 						// console.log(classFn ,childWorkflow.class)
 						var instance = new classFn(entry.parent);
 						instance.parentWorkflow = workflowId;
@@ -112,7 +129,7 @@ var server = jayson.server({
 			if(childWorkflow.schedule && !childWorkflow.started){
 				// create a new workflow
 				// console.log("childWorkflow",childWorkflowId,childWorkflow);				
-				var classFn = workflowFactrory[childWorkflow.class];
+				var classFn = workflowFactory[childWorkflow.class];
 
 				// console.log(classFn ,childWorkflow.class)
 				var instance = new classFn(childWorkflowId);
