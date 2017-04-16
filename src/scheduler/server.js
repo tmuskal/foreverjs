@@ -25,12 +25,11 @@ async function run({className,name,args,id}){
 		throw e;
 	}		
 }
-function taint(id){
-	return server.taint(id);
+async function taint({workflowId}){
+	return await srv.taint({workflowId});
 }
 
-
-var server = jayson.server({
+var srv = {
 	run:async function ({className,name,args,id}){
 		return await run({className,name,args,id});
 	},
@@ -53,8 +52,9 @@ var server = jayson.server({
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
-
+	    var parent;
 		var entries = await journal.getEntries();
+		// console.log("entries",entries)
 		// add schedule if last activity completed or failed
 		var tasks = {}
 		var childWorkflows = {}
@@ -68,7 +68,10 @@ var server = jayson.server({
 					tasks[entry.dispatchId].finished = true;
 					break;
 				case "ScheduleActivity":
-					tasks[entry.dispatchId] = {schedule:true};
+					var failedCount = 0;
+					if(tasks[entry.dispatchId])
+						failedCount = tasks[entry.dispatchId].failedCount;
+					tasks[entry.dispatchId] = {schedule:true,failedCount};
 					break;
 				case "FailedActivity":
 					needANewDecisionTask = true;
@@ -76,8 +79,9 @@ var server = jayson.server({
 					if(!tasks[entry.dispatchId].failedCount){
 						tasks[entry.dispatchId].failedCount=1;
 					}
-					else 
+					else {
 						tasks[entry.dispatchId].failedCount++;
+					}
 					break;
 				case "StartedActivity":
 					tasks[entry.dispatchId].started = true;
@@ -102,7 +106,10 @@ var server = jayson.server({
 					needANewDecisionTask = true;
 					break;	
 				case 'ScheduleChildWorkflow':
-					childWorkflows[entry.dispatchId] = {schedule:true,args:entry.args, name:entry.name,class:entry.class};
+					var failedCount = 0;
+					if(childWorkflows[entry.dispatchId])
+						failedCount = childWorkflows[entry.dispatchId].failedCount;				
+					childWorkflows[entry.dispatchId] = {schedule:true,args:entry.args, name:entry.name,class:entry.class,failedCount};
 					break;
 				case 'StartChildWorkflow':
 					childWorkflows[entry.dispatchId].started = true;
@@ -124,32 +131,41 @@ var server = jayson.server({
 					childWorkflows[entry.dispatchId].finished = true;
 					needANewDecisionTask = true;
 					break;
+				case 'WorkflowStarted':
+					parent = entry;
+					break;
 				case 'WorkflowComplete':
 					// release waiting callbacks
 					// needANewDecisionTask = false;										
 					// taint parent
-					if(entry.parent){
-						var classFn = workflowFactory[entry.class];
+					if(parent && parent.parent){
+	    				var parentJournal = journalService.getJournal(parent.parent);
+						// var classFn = workflowFactory[entry.class];
 						// console.log(classFn ,childWorkflow.class)
-						var instance = new classFn(entry.parent);
-						instance.parentWorkflow = workflowId;
-						instance.innerDispatch = true;
-						await instance.journal.append({type:"FinishedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
-						await instance.scheduler.taint();
+						// var instance = new classFn(entry.parent);
+						// instance.parentWorkflow = workflowId;
+						await parentJournal.append({type:"FinishedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
+						// await instance.scheduler.taint();
+						await taint({workflowId:parent.parent});
+
 					}
 					break;
 				case 'WorkflowFailed':
 					// release waiting callbacks
 					// needANewDecisionTask = false;										
 					// taint parent
-					if(entry.parent){
-						var classFn = workflowFactory[entry.class];
+					// console.log("parent",parent);
+					if(parent && parent.parent){
+	    				// console.log(parent.parent);
+						// discover parent
+	    				var parentJournal = journalService.getJournal(parent.parent);
+						// var classFn = workflowFactory[parent.class];
 						// console.log(classFn ,childWorkflow.class)
-						var instance = new classFn(entry.parent);
-						instance.parentWorkflow = workflowId;
-						instance.innerDispatch = true;
-						await instance.journal.append({type:"FailedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
-						await instance.scheduler.taint();
+						// var instance = new classFn(parent.parent);
+						// instance.parentWorkflow = workflowId;
+						await parentJournal.append({type:"FailedChildWorkflow", date: new Date(), result:entry.result, dispatchId:workflowId});
+						await taint({workflowId:parent.parent});
+						return;
 					}
 					break;					
 			}
@@ -159,13 +175,14 @@ var server = jayson.server({
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];
 			if(task.schedule && !task.started){
-				if(tasks[taskId].failedCount > 5){
+				if(task.failedCount > 5){
 					// fail entire workflow
-      				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' ,parent});
-					await taint(workflowId);
-					return;
+      				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' });
+					await taint({workflowId});
+					continue;
 				}
-				await activityTasks.putJob({workflowId:workflowId,taskId});
+				else
+					await activityTasks.putJob({workflowId,taskId});
 			}
 		}
 
@@ -176,9 +193,9 @@ var server = jayson.server({
 			if(childWorkflow.schedule && !childWorkflow.started){
 				if(childWorkflow.failedCount > 5){
 					// fail entire workflow
-      				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' ,parent});
-					await taint(workflowId);
-					return;
+      				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
+					await taint({workflowId});
+					continue;
 				}				
 				// create a new workflow
 				// console.log("childWorkflow",childWorkflowId,childWorkflow);				
@@ -187,6 +204,7 @@ var server = jayson.server({
 				// console.log(classFn ,childWorkflow.class)
 				var instance = new classFn(childWorkflowId);
 				instance.parentWorkflow = workflowId;
+				await instance.journal.clear();
 
 		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
 		  		try{	  
@@ -253,7 +271,8 @@ var server = jayson.server({
 	// complete activity
 	// timeouts
 	
-});
+}
+var server = jayson.server(srv);
 
 const http = server.http()
 http.listen(4003);

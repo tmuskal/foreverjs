@@ -124,7 +124,9 @@ function workflow() {
 		      		throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
 		      	}
 		  		if(state.failed){
-		  			throw state.result;
+		      		throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
+		  			
+		  			// throw state.result;
 		  		}
 		      	if(state.finished){
 		      		return state.result;

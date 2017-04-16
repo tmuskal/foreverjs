@@ -34,7 +34,10 @@ class SchedulerService{
 		return scheduler;
 	}
 	async run({className,name,args,id}){
-		return (await client.request('run', {className,name,args,id})).result;
+		var res = (await client.request('run', {className,name,args,id}));
+		if(res.error)
+			throw res.error;
+		return res.result;
 		
 	}
 }

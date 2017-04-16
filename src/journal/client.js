@@ -7,7 +7,10 @@ class Journal{
 	}
 	async getEntries(){
 		return (await client.request('getEntries', {id:this.id})).result;
-	}	
+	}
+	async clear(){
+		return (await client.request('clear', {id:this.id})).result;
+	}
 	append(entry){
 		// console.log("journal:",this.id,entry);
 		return client.request('append',{entry, id:this.id});

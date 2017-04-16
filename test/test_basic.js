@@ -52,6 +52,7 @@ class sample2 extends WorkflowController{
 		var x = a;
 		var b = await this.doB5(x);
 		var m = await this.waitForSignal("human 1");
+		// var aa = await this.doX();
 		return b;
 	}	
 	fireSignal(){
@@ -61,6 +62,11 @@ class sample2 extends WorkflowController{
 	async doB5(n){
 		setTimeout(this.fireSignal.bind(this),2000)
 		return n * n;
+	}
+	@activity()
+	async doX(){
+		console.log('doX')
+		throw new Error('not working');
 	}
 }
 
@@ -85,9 +91,9 @@ function stopAll(){
 
 // dispatcher (gateway - this is exposed in a remote client)
 async function testSimple2(){
-	var dt = new Date();
+	var dt = new Date();	
 	var y = await schedulerClient.run({className:'sample',name:'doA',args:[5],id:'test1' + dt});
 	console.log("y = ",y);
 	stopAll();
 }
-testSimple2();
+testSimple2().catch((err)=>console.log('got error', err));
