@@ -68,7 +68,12 @@ bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
   const from = msg.chat.id;
   const interaction = manager.getInteraction(from);
   // console.log(from,interaction,callbackQuery);
-  await interaction.triggerCallback(action);
+  if(!interaction){
+    await handleNewConversation(msg.chat.id, msg.data);
+    // not in conversation. maybe start one through scheduler.
+  }
+  else
+    await interaction.triggerCallback(action);
 
 });
 async function handleNewConversation(userId, text){

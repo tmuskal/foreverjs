@@ -40,11 +40,15 @@ class todosWf extends WorkflowController{
 				return;			
 			}
 			else{
-
+				return await this.removeTodo(choice);
 			}			
 		}
 	}
-
+	@activity()
+	async removeTodo(todo){	
+		todos = todos.filter(t=> t != todo);
+		console.log("removed todo", todo);
+	}
 	@activity()
 	async processNewTodo(newTodo,id){	
 		todos.push(newTodo);
