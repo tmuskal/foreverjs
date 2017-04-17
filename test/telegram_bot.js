@@ -73,6 +73,53 @@ class todosWf extends WorkflowController{
 
 }
 
+class reminder extends WorkflowController{
+	@workflow()
+	async start({telegramUserId}){
+		var when = await this.doHuman({
+				prepare:this.prepareWhen,
+				process:function (result){
+					var dic = {
+						'1m': 60,
+						'5m': 300,
+						'1h': 3600
+					}
+					return dic[result];				
+				},
+				id:'reminderWhen',
+				payload:{telegramUserId}
+			});
+		var what = await this.doHuman({
+				prepare:this.prepareNewReminder,
+				process:function (result){
+					return result;				
+				},
+				id:'reminderWhat',
+				payload:{telegramUserId}
+			});		
+		if(when){
+			await this.sleep(when);
+			await this.remind({telegramUserId,text:what})
+		}
+	}
+	@activity()
+	async remind({telegramUserId,text}){		
+		await telegramInteractionsManager.sendMessage(telegramUserId, "you asked to remind you: " + text);
+	}
+	@activity()
+	async prepareNewReminder({telegramUserId},id){		
+		var newInteraction = telegramInteractionsManager.newInteraction(telegramUserId,this.workflowId, id);
+		newInteraction.sendMessage("enter text to remind you:");
+	}		
+	@activity()
+	async prepareWhen({telegramUserId},id){
+		var newInteraction = telegramInteractionsManager.newInteraction(telegramUserId,this.workflowId, id);
+		var choices = {'1m':'1 Minute','5m':"5 Mintues","1h":"1 Hour"};
+
+		newInteraction.sendMessage("to when", choices);
+	}	
+
+}
 class mainTelegram extends WorkflowController{
 	@workflow()
 	async start({telegramUserId,telegramText}){
@@ -87,14 +134,13 @@ class mainTelegram extends WorkflowController{
 				payload:{telegramUserId,i}
 			});
 		}		
-		var classFn = eval(definitions.results);
-		var instance = new classFn(this.newDispatchID());
-		return await instance.start({telegramUserId})
+		await this.dispatchWf({telegramUserId,className:definitions.results})
+		return 
 		// var aa = await this.doX();
 	}
 	@activity()
-	async thankYou(telegramUserId){		
-		await telegramInteractionsManager.sendMessage(telegramUserId, "thank you");
+	async dispatchWf({telegramUserId,className}){	
+		schedulerClient.run({className,name:'start',args:[{telegramUserId}],id:'test12' + new Date().getTime()});		
 	}	
 	@activity()
 	async process(result,id){
@@ -120,6 +166,7 @@ class mainTelegram extends WorkflowController{
 workflowFactory.mainTelegram = mainTelegram;
 workflowFactory.todosWf = todosWf;
 workflowFactory.theWeather = theWeather;
+workflowFactory.reminder = reminder;
 import jobQueueServer from '../src/job_queue/server';
 import journalServer from '../src/journal/server';
 import schedulerServer from '../src/scheduler/server';
