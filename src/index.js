@@ -10,7 +10,10 @@ import schedulerClient from './scheduler/client';
 export {workflowFactory, Worker, workflow, WorkflowController, activity, schedulerClient};
 
 // todo: telegram bot: https://github.com/yagop/node-telegram-bot-api
-// todo: client configuration for server addresses
+// todo: persistence layer for graph entities.
+// todo: easier registration of workflows. (self registering)
+// todo: config
+// todo: 	client configuration for server addresses
 // todo: discover recovering processes (timers, active journals) in scheduler start
 // todo: journal backend plugins
 // todo: persist journal server
