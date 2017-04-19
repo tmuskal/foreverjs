@@ -1,8 +1,8 @@
 {
   "name": "foreverjs",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "babel-node test/test_basic.js",
     "compile": "babel -d lib/ src/",
@@ -13,13 +13,16 @@
   "license": "ISC",
   "dependencies": {
     "babel-cli": "^6.24.0",
+    "babel-runtime": "^6.23.0",
     "jayson": "^2.0.3",
     "node-telegram-bot-api": "^0.27.0"
   },
   "devDependencies": {
     "babel-cli": "^6.24.0",
+    "babel-core": "^6.24.1",
     "babel-plugin-transform-decorators": "^6.22.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-polyfill": "^6.23.0",
     "babel-preset-es2015": "^6.24.0",
     "babel-preset-es2016": "^6.22.0",
     "babel-preset-es2017": "^6.22.0"

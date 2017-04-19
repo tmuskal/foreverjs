@@ -1,3 +1,6 @@
+require("babel-core/register");
+require("babel-polyfill");
+
 import WorkflowController from './workflow_controller';
 import workflow from './annotations/workflow';
 import activity from './annotations/activity';
