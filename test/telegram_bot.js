@@ -2,7 +2,7 @@ import {workflowFactory, Worker, workflow, WorkflowController, activity} from '.
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../src/workflow_signals'
 import journalService from '../src/journal/client';
 import telegramInteractionsManager from '../src/helpers/telegram';
-
+import schedulerClient from '../src/scheduler/client';
 
 class theWeather extends WorkflowController{
 	@workflow()
@@ -167,8 +167,7 @@ workflowFactory.mainTelegram = mainTelegram;
 workflowFactory.todosWf = todosWf;
 workflowFactory.theWeather = theWeather;
 workflowFactory.reminder = reminder;
-import jobQueueServer from '../src/job_queue/server';
-import journalServer from '../src/journal/server';
-import schedulerServer from '../src/scheduler/server';
-import worker from '../src/workers/server';
-import schedulerClient from '../src/scheduler/client';
+
+import {server} from '../src/index';
+server.startAll();
+
