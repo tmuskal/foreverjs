@@ -8,7 +8,7 @@ var foreverjs = require('foreverjs');
 
  class NewWorkflow extends foreverjs.WorkflowController{
  }
- foreverjs.workflowFactory = NewWorkflow
+ foreverjs.workflowFactory.NewWorkflow = NewWorkflow
 */
 
 foreverjs.server.startAll();

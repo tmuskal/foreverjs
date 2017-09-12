@@ -1,3 +1,10 @@
 ---
 server:
   build: .
+  links: 
+    - mongo
+    - queue
+mongo:
+  image: mongo
+queue:
+  image: rabbitmq

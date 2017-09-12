@@ -1,25 +1,12 @@
 const jayson = require('jayson/promise');
+const inMemoryPlugin = require('../plugins/journal/memory').default;
+const mongoPlugin = require('../plugins/journal/mongodb').default;
 const entries = {};
+const plugin = inMemoryPlugin;
 
-var server = jayson.server({
-	getEntries: async function({id}){
-			if(!entries[id])
-				return [];
-			else{
-				// console.log("journal list", entries[id]);
-				return entries[id];
-			}
-	},	
-	clear: async function({id}){	      
-			entries[id] = [];
-	},		
-	append: async function({entry,id}){
-			// console.log("journal:",id,entry);
-			if(!entries[id])
-				entries[id] = [];
-			entries[id].push(entry);
-	}
-});
+plugin.init();
+
+var server = jayson.server(plugin);
 
 const http = server.http()
 export default http;

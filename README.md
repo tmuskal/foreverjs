@@ -78,3 +78,11 @@ class sample2 extends WorkflowController{
 schedulerClient.run({className:'sample',name:'doA',args:[5],id:'test1'});
 
 ```
+
+todos:
+------
+
+
+* persist journal
+* use queue
+* scheduler

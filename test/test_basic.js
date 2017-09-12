@@ -1,5 +1,5 @@
-import {workflowLoader,server} from '../src/index';
-import schedulerClient from '../src/scheduler/client';
+const {workflowLoader,server} = require('../src/index');
+const schedulerClient = require('../src/scheduler/client').default;
 var normalizedPath = require("path").join(__dirname, "../src/example_workflows");
 workflowLoader.load(normalizedPath);
 server.startAll();
