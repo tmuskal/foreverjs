@@ -4,8 +4,9 @@ var normalizedPath = require("path").join(__dirname, "../src/example_workflows")
 workflowLoader.load(normalizedPath);
 server.startAll();
 
-function stopAll(){
-	server.stopAll()
+function stopAll(){	
+	server.stopAll();
+	process.exit();
 }
 
 // dispatcher (gateway - this is exposed in a remote client)
