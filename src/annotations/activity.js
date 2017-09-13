@@ -1,4 +1,7 @@
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
+const moment = require("moment");
+import logger from '../logger';
+
 
 function activity() {
 
@@ -36,6 +39,7 @@ function activity() {
 	      		var dispatchId = this.newDispatchID();
 
 		      	var state = await this.stateFromHistory(dispatchId);
+		      	logger.debug("state.started",state.started)
 		      	if(state.finished){
 		      		return state.result;
 		      	}
@@ -52,6 +56,12 @@ function activity() {
 		      		throw new WorkflowNoDecision();
 		      	}
 		      	if(state.started){
+		      		logger.debug("timeout1", moment().diff(moment(state.last_activity).utc(), 'minutes'));		      	
+		      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
+		      			// handle timeout
+		      			logger.debug("timeout2");
+
+		      		}
 		      		throw new WorkflowNoDecision();
 		      	}		      	
 	      	}

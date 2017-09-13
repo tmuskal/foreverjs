@@ -1,8 +1,10 @@
 import journalService from './journal/client';
 import workflowFactory from './workflow_factory';
 import jobQueue from './job_queue/client';
+import logger from './logger';
+
 function delay(time) {
-  return new Promise(function (fulfill) {
+  return new Promise(function (fulfill) {  	
     setTimeout(fulfill, time);
   });
 }
@@ -11,10 +13,14 @@ async function DoDecisionTask(job){
 	// console.log("need to do decision for ", job);
 	
 	try{
+		logger.debug("DoDecisionTask " + job.workflowId);
 		var journal = journalService.getJournal(job.workflowId);
 		var entries = await journal.getEntries();
-		var params = entries.find(e=>e.type == 'WorkflowStarted')	
-		var classFn = workflowFactory[params.class];
+		var params = entries.find(e=>e.type === 'WorkflowStarted')
+		if(!params){
+			return
+		}
+		var classFn = workflowFactory[params.class];		
 		var instance = new classFn(job.workflowId);
 		instance.mainRun = true;
 		await instance[params.name](...Object.values(params.args));
@@ -26,6 +32,7 @@ async function DoDecisionTask(job){
 async function DoActivityTask(job){
 	// console.log("need to do ", job);	
 	try{
+		logger.debug("DoActivityTask " + job.taskId);
 		var journal = journalService.getJournal(job.workflowId);
 		var entries = await journal.getEntries();
 		var params = entries.find(e=>e.type == 'WorkflowStarted')

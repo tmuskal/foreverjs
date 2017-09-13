@@ -15,8 +15,10 @@
     "babel-cli": "^6.24.0",
     "babel-runtime": "^6.23.0",
     "jayson": "^2.0.3",
+    "moment": "^2.18.1",
     "mongodb": "^2.2.31",
-    "node-telegram-bot-api": "^0.27.0"
+    "node-telegram-bot-api": "^0.27.0",
+    "winston": "^2.3.1"
   },
   "devDependencies": {
     "babel-cli": "^6.24.0",

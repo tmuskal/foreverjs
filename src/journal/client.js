@@ -27,6 +27,9 @@ class JournalService{
 		}
 		return journal;
 	}	
+	async getJournals(){
+		return await client.request('getJournals',{debug:true});
+	}	
 }
 
 export default new JournalService();

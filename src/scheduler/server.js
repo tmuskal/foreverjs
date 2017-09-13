@@ -33,9 +33,14 @@ var srv = {
 	run:async function ({className,name,args,id}){
 		return await run({className,name,args,id});
 	},
+	recover:async function (){
+		await delay(500);
+		const journals = await journalService.getJournals();		
+		await Promise.all(journals.result.map(j=>srv.taint({workflowId: j})));
+	},
 	scheduleTimer: async function({duration,timerId,workflowId}){
 		await delay(duration * 1000);
-	    var journal = journalService.getJournal(workflowId);		
+	    var journal = journalService.getJournal(workflowId);
 		await journal.append({type:"TimerFired", date: new Date(),timerId});
 		await journal.append({type:"DecisionTaskSchedule", date: new Date()});
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
@@ -150,9 +155,9 @@ var srv = {
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FinishedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
 						// await instance.scheduler.taint();
-						await taint({workflowId:parent.parent});
-
+						await taint({workflowId:parent.parent});						
 					}
+					// await journal.clear();
 					break;
 				case 'WorkflowFailed':
 					// release waiting callbacks
@@ -279,5 +284,7 @@ var srv = {
 var server = jayson.server(srv);
 
 const http = server.http()
-http.listen(4003);
+srv.recover().then(()=>{
+	http.listen(4003);
+})
 export default http;

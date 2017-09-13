@@ -1,6 +1,7 @@
 import journalService from './journal/client';
 import scheduler from './scheduler/client';
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew} from './workflow_signals'
+import logger from './logger';
 
 class WorkflowController{
 	constructor(workflowId, activityMode){
@@ -20,7 +21,7 @@ class WorkflowController{
 		for (var i = 0; i < entries.length; i++) {
 			var entry = entries[i];
 				// if schedule event, set state to scheduled
-			if(entry.type == 'WorkflowStarted'){
+			if(entry.type == 'WorkflowStarted'){				
 				state = {started : true, name:entry.name, args:entry.args};
 			}
 			else if(entry.type == 'WorkflowComplete'){
@@ -30,6 +31,7 @@ class WorkflowController{
 				state = {failed : true,result:entry.result};			
 			}
 		}	
+		logger.debug("wf state: " + JSON.stringify(state));
 		return state;
 	}
 	async stateFromHistory(dispatchId, journal){
@@ -46,7 +48,10 @@ class WorkflowController{
 					state = {scheduled : true, name:entry.name, args:entry.args};
 				}
 				else if(entry.type == 'StartActivity' || entry.type == 'StartChildWorkflow'){
-					state = {started : true, name:entry.name, args:entry.args};
+					state = {started : true, name:entry.name, args:entry.args, last_activity: entry.date};
+				}
+				else if(entry.type == 'Heartbeat' && state.started){
+					state.last_activity = entry.date;
 				}
 				else if(entry.type == 'FailedActivity' || entry.type == 'FailedChildWorkflow'){
 					failures++;
@@ -61,6 +66,7 @@ class WorkflowController{
 				}			
 			}
 		}	
+		logger.debug("state: " + JSON.stringify(state));
 		return state;
 	}	
 	newDispatchID(){
@@ -72,11 +78,13 @@ class WorkflowController{
 		var entries = await this.journal.getEntries();
 		var timerFired = entries.find(e=>e.type === 'TimerFired' && e.timerId == timerId);
 		if(timerFired){
+			logger.debug("timer fired " + timerId);
 			return;
 		}
 
 		var timerSetup = entries.find(e=>e.type === 'TimerSetup' && e.timerId == timerId);
-		if(!timerSetup){			
+		if(!timerSetup){
+			logger.debug("setting up time " + timerId);
 			throw new WorkflowTimerDecision(durationInSeconds,timerId);
 		}
 		var threshold = new Date(timerSetup.date.getTime() + durationInSeconds * 1000);
@@ -85,9 +93,11 @@ class WorkflowController{
 			// should be moved to scheduler
 			// should add have new decision task.						
 			// await this.journal.append({type:"TimerFired", date: new Date(),timerId});
+			logger.debug("done sleeping" + timerId);
 			return;
 		}
 		else{
+			logger.debug("still sleeping "+ timerId);
 			throw new WorkflowNoDecision();
 		}
 	}

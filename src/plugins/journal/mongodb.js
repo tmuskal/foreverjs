@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient, test = require('assert');
 var Promise = require('bluebird');
 // Connection url
-var url = 'mongodb://localhost:27017/test';
+var url = 'mongodb://localhost:27017/test2';
 const plugin = {
 	init: async function(){		
 		// Connect using MongoClient
@@ -11,7 +11,14 @@ const plugin = {
 			const db = await MongoClient.connect(url);
 			var col = db.collection(id);			
 			var results = await col.find({}).toArray();
-			db.close()
+			db.close();
+			return results;
+	},
+	getJournals: async function({debug}){
+			const db = await MongoClient.connect(url);
+			const collections = await db.collections();
+			const results = collections.map(c => c.collectionName);
+			db.close();
 			return results;
 	},	
 	clear: async function({id}){
