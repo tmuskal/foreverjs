@@ -1,8 +1,14 @@
 const jayson = require('jayson/promise');
+const moment = require("moment");
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
 import JobQueueServer  from '../job_queue/client';
 import workflowFactory from '../workflow_factory';
 import journalService from '../journal/client';
+import logger from '../logger';
+import workflowStateFromHistory from '../workflow_state_helper'
+import activityStateFromHistory from '../activity_state_helper'
+
+
 function delay(time) {
   return new Promise(function (fulfill) {
     setTimeout(fulfill, time);
@@ -35,8 +41,24 @@ var srv = {
 	},
 	recover:async function (){
 		await delay(500);
-		const journals = await journalService.getJournals();		
-		await Promise.all(journals.result.map(j=>srv.taint({workflowId: j})));
+		const journals = await journalService.getJournals();
+		const journals_with_entries = await Promise.all(journals.result.map(async (j)=> {
+			const journal = journalService.getJournal(j);			
+			const entries = await journal.getEntries();
+			if(!entries.find(e=>e.type==="WorkflowStarted"))
+				return Promise.resolve();				
+
+			if(!entries.find(e=>e.type==="WorkflowComplete")){
+				logger.debug("Recovering",j)
+				return srv.taint({workflowId: j});
+			}
+			else
+			{
+				return Promise.resolve();
+			}
+		}));
+
+		// await Promise.all(journals.result.map(j=>srv.taint({workflowId: j})));
 	},
 	scheduleTimer: async function({duration,timerId,workflowId}){
 		await delay(duration * 1000);
@@ -54,7 +76,7 @@ var srv = {
 		await decisionTasks.putJob({workflowId:workflowId});
 	},	
 	taint: async function({workflowId}){
-		// console.log('in taint',workflowId);
+		logger.debug('in taint',workflowId);
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
@@ -146,7 +168,7 @@ var srv = {
 				case 'WorkflowComplete':
 					// release waiting callbacks
 					// needANewDecisionTask = false;										
-					// taint parent
+					// taint parent					
 					if(parent && parent.parent){
 	    				var parentJournal = journalService.getJournal(parent.parent);
 						// var classFn = workflowFactory[entry.class];
@@ -179,10 +201,13 @@ var srv = {
 					break;					
 			}
 		}
+		
 		var tasksIds = Object.keys(tasks);
 		for(var i = 0; i < tasksIds.length; i++){
 			var taskId = tasksIds[i];
-			var task = tasks[taskId];
+			var task = tasks[taskId];			
+		    var state = await activityStateFromHistory(taskId,journal);	
+		    logger.debug("activity state:",state)
 			if(task.schedule && !task.started){
 				if(task.failedCount > 5){
 					// fail entire workflow
@@ -193,12 +218,24 @@ var srv = {
 				else
 					await activityTasks.putJob({workflowId,taskId});
 			}
+			else if(state.started){					
+	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
+	      			// handle timeout
+	      			logger.debug("timeout2");
+      				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
+      				needANewDecisionTask=true;
+					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
+	      		}
+			}
 		}
 
 		var childWorkflowsIds = Object.keys(childWorkflows);
 		for(var i = 0; i < childWorkflowsIds.length; i++){
 			var childWorkflowId = childWorkflowsIds[i];
 			var childWorkflow = childWorkflows[childWorkflowId];
+			var childJournal = journalService.getJournal(childWorkflowId);						
+			var state = await workflowStateFromHistory(childJournal);
+			logger.debug("wf state:",childWorkflowId,state);
 			if(childWorkflow.schedule && !childWorkflow.started){
 				if(childWorkflow.failedCount > 5){
 					// fail entire workflow
@@ -261,6 +298,9 @@ var srv = {
 		  		}
 				// run using mainDispatch
 
+			}
+			else if(!childWorkflow.finished){
+				await this.taint({workflowId:childWorkflowId})
 			}
 		}
 		if(needANewDecisionTask){

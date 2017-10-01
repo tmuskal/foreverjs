@@ -22,5 +22,11 @@ async function testSimple2(){
 	console.log("y = ",y);
 	stopAll();
 }
-// testSimple2().catch((err)=>console.log('got error', err));
+async function testSimple4(){
+	var dt = new Date();	
+	var y = await schedulerClient.run({className:'sample3',name:'start',args:[5],id:'test1' + dt});
+	console.log("y = ",y);
+	stopAll();
+}
+// testSimple4().catch((err)=>console.log('got error', err));
 // testSimple3().catch((err)=>console.log('got error', err));

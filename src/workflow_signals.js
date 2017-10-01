@@ -28,6 +28,22 @@ class WorkflowDecisionScheduleWorkflow extends WorkflowDecision{
 		this.class = className;
 	}
 }
+
+class WorkflowDecisionActivityTimeout extends WorkflowDecision{
+	constructor(type){
+		super()
+		this.type = type;
+	}
+}
+
+class WorkflowDecisionWorkflowTimeout extends WorkflowDecision{
+	constructor(type){
+		super()
+		this.type = type;
+	}
+}
+
+
 class WorkflowDecisionContinueAsNew extends WorkflowDecision{
 	constructor(args){
 		super()

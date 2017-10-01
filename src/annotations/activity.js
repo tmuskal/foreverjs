@@ -28,6 +28,7 @@ function activity() {
 	      }
 	      const theFunc = async function(){	      	
 	      	if(this.activityMode){
+	      		
 	      		var res = await value.call(this,...arguments);
 	      		// console.log("activity res",res,arguments);
 				return res;
@@ -39,7 +40,7 @@ function activity() {
 	      		var dispatchId = this.newDispatchID();
 
 		      	var state = await this.stateFromHistory(dispatchId);
-		      	logger.debug("state.started",state.started)
+		      	// logger.debug("state.started",state.started)
 		      	if(state.finished){
 		      		return state.result;
 		      	}
@@ -47,21 +48,24 @@ function activity() {
 		      		throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);
 		      	}
 		      	if(state.failed){
+		      		// raise failed - let controller reschedule if needed.
 		      		throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);
 		      	}
 		      	if(state.timedOut){
-					throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);		      		
+		      		// not used?
+					throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);
 		      	}		      	
 		      	if(state.scheduled){
 		      		throw new WorkflowNoDecision();
 		      	}
 		      	if(state.started){
-		      		logger.debug("timeout1", moment().diff(moment(state.last_activity).utc(), 'minutes'));		      	
-		      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
-		      			// handle timeout
-		      			logger.debug("timeout2");
-
-		      		}
+		    //   		logger.debug("timeout1", moment().diff(moment(state.last_activity).utc(), 'minutes'));
+		    //   		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
+		    //   			// handle timeout
+		    //   			logger.debug("timeout2");
+		    //   			throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);
+						// // throw new WorkflowDecisionScheduleActivity("HeartBeeat");
+		    //   		}
 		      		throw new WorkflowNoDecision();
 		      	}		      	
 	      	}

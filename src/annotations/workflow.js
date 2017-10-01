@@ -31,6 +31,7 @@ function workflow() {
 			    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
 			    	var parent = (await this.journal.getEntries()).find(e=>e.type === 'WorkflowStarted').parent;
       				await this.journal.append({type:"WorkflowComplete", date: new Date(), result:res,name:name,class:this.constructor.name,id:this.workflowId,parent});
+      				
 		    		// notify scheduler
 		    		await this.scheduler.taint();
 			  	}
