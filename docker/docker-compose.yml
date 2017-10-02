@@ -1,9 +1,27 @@
 ---
-server:
+server1:
   build: .
+  environment:
+    MONGO_DB_CONNECTION_STRING: mongodb://mongo:27017/test2    
   links: 
     - mongo
     - queue
+server2:
+  build: .
+  environment:
+    JOURNAL_SERVICE_ENDPOINT: http://server1:4001
+    JOB_QUEUE_SERVICE_ENDPOINT: http://server1:4002
+    SCHEDULER_SERVICE_ENDPOINT: http://server1:4003
+  links: 
+    - server1
+server3:
+  build: .
+  environment:
+    JOURNAL_SERVICE_ENDPOINT: http://server1:4001
+    JOB_QUEUE_SERVICE_ENDPOINT: http://server1:4002
+    SCHEDULER_SERVICE_ENDPOINT: http://server1:4003  
+  links: 
+    - server1
 mongo:
   image: mongo
 queue:

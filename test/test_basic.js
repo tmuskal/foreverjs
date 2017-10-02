@@ -28,5 +28,5 @@ async function testSimple4(){
 	console.log("y = ",y);
 	stopAll();
 }
-// testSimple4().catch((err)=>console.log('got error', err));
+testSimple4().catch((err)=>console.log('got error', err));
 // testSimple3().catch((err)=>console.log('got error', err));

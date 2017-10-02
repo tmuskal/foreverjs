@@ -3,8 +3,7 @@ import journalServer from './journal/server';
 import schedulerServer from './scheduler/server';
 import workerServer from './workers/server';
 
-function startAll(){
-
+function startAll(){    
     jobQueueServer.listen(4002);
     journalServer.listen(4001);
     schedulerServer.listen(4003);

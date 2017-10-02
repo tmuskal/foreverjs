@@ -1,5 +1,6 @@
 const jayson = require('jayson/promise');
-var client = jayson.client.http('http://localhost:4002');
+import config from "../config/config";
+var client = jayson.client.http(config.get('JOB_QUEUE_SERVICE_ENDPOINT') || 'http://localhost:4002');
 
 class JobQueue {
 	constructor(id){

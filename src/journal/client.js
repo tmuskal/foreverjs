@@ -1,5 +1,8 @@
 const jayson = require('jayson/promise');
-var client = jayson.client.http('http://localhost:4001');
+import config from "../config/config";
+// Connection url
+
+var client = jayson.client.http(config.get('JOURNAL_SERVICE_ENDPOINT') || 'http://localhost:4001');
 
 class Journal{
 	constructor(id){

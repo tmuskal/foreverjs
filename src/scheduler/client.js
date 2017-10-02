@@ -3,7 +3,8 @@ import workflowFactory from '../workflow_factory';
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
 import JobQueueServer from '../job_queue/client';
 const jayson = require('jayson/promise');
-var client = jayson.client.http('http://localhost:4003');
+import config from "../config/config";
+var client = jayson.client.http(config.get('SCHEDULER_SERVICE_ENDPOINT') || 'http://localhost:4003');
 
 class Scheduler{	
 	constructor(workflowId){

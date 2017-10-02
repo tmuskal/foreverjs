@@ -1,7 +1,9 @@
 var MongoClient = require('mongodb').MongoClient, test = require('assert');
 var Promise = require('bluebird');
+import config from "../../config/config";
 // Connection url
-var url = 'mongodb://localhost:27017/test2';
+var url = config.get('MONGO_DB_CONNECTION_STRING') || 'mongodb://localhost:27017/test2';
+
 const plugin = {
 	init: async function(){		
 		// Connect using MongoClient
