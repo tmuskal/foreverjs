@@ -1,11 +1,21 @@
+parallel child workflows and tasks:
+	a) need a function parallelCall(tasks) - can catch exception for new tasks and batch them
+serialize inputs and outputs
+big blob plugin (s3,hbase, etc)
 handle timeouts in taint
+handle decision task timeout
+make journal addition a transactional process - in task completion and in decision complete
 handle timeouts - task - schedule to start. schedule to complete. start to complete. heatbeat.
+add hearbeat action for tasks
 handle timeouts - main workflow - decision task start to complete, workflow schedule to complete (fail).
 handle timeouts - signals - timeout to signal
-test for recovery
-test for timeouts
+tests:
+	test for recovery
+	test for timeouts
+	normal flows	
+
 archive completed failed/journals
-dynamically load workflows from files ( "./workflows" in running dir) - what about packages in docker?
+dynamically load workflows from files ( "./workflows" in running dir) - what about packages in docker? - cp package.json and install onbuild
 job queue backend plugins
 config
 	client configuration for server addresses (from env)
@@ -22,7 +32,6 @@ persistence layer for graph entities. (resource manager)
 configuration for all timeouts and retries
 workers - different queues.
 scheduler - integrate with mesos/hadoop
-parallel jobs
 workflow and activity versioning, murmur of function code? 
-auto roles dist when running servers in parallel
 refactor uses of journal.append
+auto roles dist when running servers in parallel\

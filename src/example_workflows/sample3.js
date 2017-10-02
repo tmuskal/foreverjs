@@ -9,7 +9,7 @@ function delay(time) {
 class sample3 extends WorkflowController{
     @workflow()
     async start(a){
-        var x = a;
+        var x = a; // 5
         var y = await this.doX(x);
         var z = await this.doX(y);
         return await this.doX(z);

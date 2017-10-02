@@ -28,7 +28,7 @@ function activity() {
 	      }
 	      const theFunc = async function(){	      	
 	      	if(this.activityMode){
-	      		
+
 	      		var res = await value.call(this,...arguments);
 	      		// console.log("activity res",res,arguments);
 				return res;
@@ -59,13 +59,7 @@ function activity() {
 		      		throw new WorkflowNoDecision();
 		      	}
 		      	if(state.started){
-		    //   		logger.debug("timeout1", moment().diff(moment(state.last_activity).utc(), 'minutes'));
-		    //   		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
-		    //   			// handle timeout
-		    //   			logger.debug("timeout2");
-		    //   			throw new WorkflowDecisionScheduleActivity(dispatchId, name, arguments);
-						// // throw new WorkflowDecisionScheduleActivity("HeartBeeat");
-		    //   		}
+
 		      		throw new WorkflowNoDecision();
 		      	}		      	
 	      	}

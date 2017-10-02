@@ -219,7 +219,7 @@ var srv = {
 					await activityTasks.putJob({workflowId,taskId});
 			}
 			else if(state.started){					
-	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
+	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 1){
 	      			// handle timeout
 	      			logger.debug("timeout2");
       				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
