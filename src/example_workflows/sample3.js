@@ -8,17 +8,16 @@ function delay(time) {
 
 class sample3 extends WorkflowController{
     @workflow()
-    async start(a){
-        var x = a; // 5
-        var y = await this.doX(x);
-        var z = await this.doX(y);
-        return await this.doX(z);
+    async start(seconds){        
+        var secondsx2 = await this.sleepAndMultiply(seconds);
+        var secondsx4 = await this.sleepAndMultiply(secondsx2);
+        return await this.sleepAndMultiply(secondsx4);
     }
     @activity()
-    async doX(b){
-        console.log('sleeping for',b);
-        await delay(b * 1000)
-        return b * 2;
+    async sleepAndMultiply(seconds){
+        console.log('sleeping for',seconds, 'seconds');
+        await delay(seconds * 1000)
+        return seconds * 2;
     }
 }
 workflowFactory.sample3 = sample3;
