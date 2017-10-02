@@ -1,6 +1,8 @@
 ---
 server1:
   build: .
+  ports:
+    - 4013:4003
   environment:
     MONGO_DB_CONNECTION_STRING: mongodb://mongo:27017/test2    
   links: 
@@ -24,5 +26,7 @@ server3:
     - server1
 mongo:
   image: mongo
+  volumes:
+    - /data/db:$PWD/db
 queue:
   image: rabbitmq
