@@ -1,7 +1,3 @@
-parallel child workflows and tasks:
-	a) need a function parallelCall(tasks) - can catch exception for new tasks and batch them
-serialize inputs and outputs
-big blob plugin (s3,hbase, etc)
 lambda tasks
 docker tasks - have socket to docker
 handle timeouts in taint
@@ -15,8 +11,9 @@ tests:
 	test for recovery
 	test for timeouts
 	normal flows	
-
 archive completed failed/journals
+serialize inputs and outputs
+big blob plugin (s3,hbase, etc)
 dynamically load workflows from files ( "./workflows" in running dir) - what about packages in docker? - cp package.json and install onbuild
 job queue backend plugins
 config
@@ -36,5 +33,4 @@ workers - different queues.
 scheduler - integrate with mesos/hadoop
 workflow and activity versioning, murmur of function code? 
 refactor uses of journal.append
-auto roles dist when running servers in parallel\
-
+auto roles dist when running servers in parallel

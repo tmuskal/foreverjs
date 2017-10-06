@@ -216,14 +216,13 @@ var srv = {
 					continue;
 				}
 				else{
-					console.log("putJob",workflowId,taskId)
 					await activityTasks.putJob({workflowId,taskId});
 				}
 			}
 			else if(state.started){					
 	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 1){
 	      			// handle timeout
-	      			logger.debug("timeout2");
+	      			logger.debug("TimedOutActivity");
       				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
       				needANewDecisionTask=true;
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
