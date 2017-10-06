@@ -1,4 +1,4 @@
-import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew} from '../workflow_signals'
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew,WorkflowDecisionMultipleDecisions} from '../workflow_signals'
 import journalService from '../journal/client';
 
 function workflow() {
@@ -36,8 +36,7 @@ function workflow() {
 		    		await this.scheduler.taint();
 			  	}
 			  	catch(e){
-			  		// console.log(e);
-				    if (e instanceof WorkflowDecision) {
+			  		async function handleDecision(e){
 				    	if(e instanceof WorkflowNoDecision){
 				    	}
 				    	if (e instanceof WorkflowDecisionScheduleActivity) {
@@ -55,21 +54,28 @@ function workflow() {
 				    	else if (e instanceof WorkflowDecisionContinueAsNew){
 				    		await this.journal.append({type:"ContinueAsNew", date: new Date(),args:e.args,name:name,class:this.constructor.name,dispatchId:this.workflowId + "_1"});
 				    	}
-
-				    	// current decisionTask execution id
+				    	else if (e instanceof WorkflowDecisionMultipleDecisions){
+				    		return await Promise.all(e.decisions.map(decision=>handleDecision.bind(this)(decision)));
+				    	}
+				    	else if(! (e instanceof WorkflowDecision)){
+					    	console.log('real error',e);
+					    	// mark failed
+					    	await this.journal.append({type:"DecisionTaskFailed", date: new Date(),error:e});
+					    	await this.scheduler.taint();
+					    	throw e;
+				    	}
+				    	return e;
+				        // statements to handle TypeError exceptions
+			  		}
+			  		// console.log(e);
+			  		var res = handleDecision.bind(this)(e);
+				    if (e instanceof WorkflowDecision) {
 				    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
 						// notify scheduler		
 				    	await this.scheduler.taint();
 						// complete decision task
-				    	return e;
-				        // statements to handle TypeError exceptions
-				    } else {
-				    	console.log('real error',e);
-				    	// mark failed
-				    	await this.journal.append({type:"DecisionTaskFailed", date: new Date(),error:e});
-						// notify scheduler		
-						await this.scheduler.taint();
-				    	throw e;
+				    	return res;
+
 				    }
 			  	}		  		
 		  	}

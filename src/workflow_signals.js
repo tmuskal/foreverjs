@@ -9,6 +9,14 @@ class WorkflowTimerDecision extends WorkflowDecision{
 
 	}	
 }
+
+class WorkflowDecisionMultipleDecisions extends WorkflowDecision{
+	constructor(decisions){
+		super()
+		this.decisions = decisions;
+	}
+}
+
 class WorkflowDecisionScheduleActivity extends WorkflowDecision{
 	constructor(dispatchId,name,args){
 		super()
@@ -52,4 +60,4 @@ class WorkflowDecisionContinueAsNew extends WorkflowDecision{
 }
 
 
-export {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew}
+export {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew,WorkflowDecisionMultipleDecisions}

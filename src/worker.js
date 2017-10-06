@@ -73,11 +73,11 @@ class Worker{
 	constructor(){
 	}
 	async runAll(){
-		// var keys = Object.keys(workflowFactory);
-		// for (var i = keys.length - 1; i >= 0; i--) {	
-			PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
-			PeriodicDoActivityTask(jobQueue.getJobQueue("activities"),this);
-		// }
+		PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
+		// two workers
+		const activities = jobQueue.getJobQueue("activities");
+		PeriodicDoActivityTask(activities,this);
+		PeriodicDoActivityTask(activities,this);
 	}
 }
 

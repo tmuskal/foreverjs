@@ -24,7 +24,7 @@ async function testSimple2(){
 }
 async function testSimple4(){
 	var dt = new Date();	
-	var y = await schedulerClient.run({className:'sample3',name:'start',args:[5],id:'test1' + dt});
+	var y = await schedulerClient.run({className:'sample3p',name:'start',args:[1],id:'test1' + dt});
 	console.log("y = ",y);
 	stopAll();
 }

@@ -2,6 +2,8 @@ parallel child workflows and tasks:
 	a) need a function parallelCall(tasks) - can catch exception for new tasks and batch them
 serialize inputs and outputs
 big blob plugin (s3,hbase, etc)
+lambda tasks
+docker tasks - have socket to docker
 handle timeouts in taint
 handle decision task timeout
 make journal addition a transactional process - in task completion and in decision complete
@@ -35,3 +37,4 @@ scheduler - integrate with mesos/hadoop
 workflow and activity versioning, murmur of function code? 
 refactor uses of journal.append
 auto roles dist when running servers in parallel\
+

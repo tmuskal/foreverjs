@@ -1,6 +1,6 @@
 import journalService from './journal/client';
 import scheduler from './scheduler/client';
-import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew} from './workflow_signals'
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew,WorkflowDecisionMultipleDecisions} from './workflow_signals'
 import logger from './logger';
 import workflowStateFromHistory from './workflow_state_helper'
 import activityStateFromHistory from './activity_state_helper'
@@ -51,6 +51,26 @@ class WorkflowController{
 			logger.debug("still sleeping "+ timerId);
 			throw new WorkflowNoDecision();
 		}
+	}	
+	async parallel_do(list,fn){
+		// batch all exceptions
+		var exceptions = [];		
+		var results = [];
+		for (var i = list.length - 1; i >= 0; i--) {
+			var thing = list[i];
+			try{
+				var result = await fn(thing);
+				results.push(result);
+			}
+			catch(ex){
+				exceptions.push(ex);
+				// aggregate
+			}
+		}
+		if(exceptions.length > 0){
+			throw new WorkflowDecisionMultipleDecisions(exceptions);
+		}
+		return results;
 	}
 	async waitForSignal(signalId){
 		var entries = await this.journal.getEntries();

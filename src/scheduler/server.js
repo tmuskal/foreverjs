@@ -215,8 +215,10 @@ var srv = {
 					await taint({workflowId});
 					continue;
 				}
-				else
+				else{
+					console.log("putJob",workflowId,taskId)
 					await activityTasks.putJob({workflowId,taskId});
+				}
 			}
 			else if(state.started){					
 	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 1){
