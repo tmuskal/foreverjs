@@ -1,11 +1,11 @@
 {
   "name": "foreverjs",
-  "version": "1.0.9",
+  "version": "1.1.102",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "test": "babel-node test/test_basic.js",
-    "test-docker": "SCHEDULER_SERVICE_ENDPOINT=http://localhost:4013 npm run test",    
+    "test-docker": "SCHEDULER_SERVICE_ENDPOINT=http://localhost:4013 npm run test",
     "compile": "babel -d lib/ src/",
     "prepublish": "npm run compile",
     "start": "babel-node src/server.js"
@@ -13,8 +13,10 @@
   "author": "Tal Muskal <tal@musk.al>",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.130.0",
     "babel-cli": "^6.24.0",
     "babel-runtime": "^6.23.0",
+    "bluebird": "^3.5.1",
     "jayson": "^2.0.3",
     "moment": "^2.18.1",
     "mongodb": "^2.2.31",

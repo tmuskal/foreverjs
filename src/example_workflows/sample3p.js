@@ -1,4 +1,4 @@
-import {workflowFactory, workflow, WorkflowController, activity} from '../index';
+import {workflowFactory, workflow, WorkflowController, activity,lambdaActivity} from '../index';
 
 function delay(time) {
   return new Promise(function (fulfill) {   
@@ -9,9 +9,10 @@ function delay(time) {
 class sample3p extends WorkflowController{
     @workflow()
     async start(seconds){        
+        console.log("fetched_paged",fetched_paged);
         var secondsx2 = await this.parallel_do([seconds,seconds*1.2],this.sleepAndMultiply);
         var secondsx4 = await this.parallel_do(secondsx2,this.sleepAndMultiply);
-        var secondsx8 = await this.parallel_do(secondsx4,this.sleepAndMultiply);        
+        var secondsx8 = await this.parallel_do(secondsx4,this.sleepAndMultiply);                
         return secondsx8[0];
     }
     @activity()

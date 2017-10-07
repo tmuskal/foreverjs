@@ -40,12 +40,13 @@ async function DoActivityTask(job){
 		var instance = new classFn(job.workflowId);
 		var dispatchId = job.taskId;
 		var paramsActivity = entries.find(e=>e.dispatchId == dispatchId);
-		instance.activityMode = true;
+		instance.activityMode = true;		
 		await instance.journal.append({type:"StartedActivity", date: new Date(), dispatchId, args:paramsActivity.args,name:paramsActivity.name});		
-		var res = await instance[paramsActivity.name](...Object.values(paramsActivity.args))
+		var res = await instance[paramsActivity.name](...Object.values(paramsActivity.args));			
 		await instance.journal.append({type:"FinishedActivity", date: new Date(), dispatchId, result: res});	
 	}
 	catch(e){
+		logger.warn(e);
 		await instance.journal.append({type:"FailedActivity", date: new Date(), dispatchId, error:e});	
 	}
 	// console.log(instance.journal.getEntries());

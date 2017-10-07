@@ -1,6 +1,6 @@
 const jayson = require('jayson/promise');
 const moment = require("moment");
-import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision} from '../workflow_signals'
+import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision} from '../workflow_signals'
 import JobQueueServer  from '../job_queue/client';
 import workflowFactory from '../workflow_factory';
 import journalService from '../journal/client';
