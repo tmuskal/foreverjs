@@ -4,6 +4,7 @@ const mongoPlugin = require('../plugins/journal/mongodb').default;
 const entries = {};
 const plugin = mongoPlugin;
 
+
 plugin.init();
 
 var server = jayson.server(plugin);
