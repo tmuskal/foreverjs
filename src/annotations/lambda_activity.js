@@ -31,10 +31,16 @@ function lambdaActivity(functionName) {
 	      const theFunc = async function(){	      	
 	      	if(this.activityMode){
 	      		logger.debug("invoking lambda", functionName);
-				 return lambda.invoke({
+				 return await lambda.invoke({
 				  FunctionName: functionName, 
 				  Payload: JSON.stringify(arguments), 
-				 }).promise().then(res=>JSON.parse(res.Payload));	      		
+				 }).promise().then(res=>{				 	
+				 	const payload = JSON.parse(res.Payload);
+				 	if(payload.errorMessage){
+				 		throw new Error(payload.errorMessage);
+				 	}
+				 	else return payload;
+				 });
 	      	}
 	      	else{
 		      	// give a canonical id - workflowid + internal activity counter

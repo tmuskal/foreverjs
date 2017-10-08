@@ -73,12 +73,12 @@ async function PeriodicDoActivityTask(queue, worker){
 class Worker{
 	constructor(){
 	}
-	async runAll(){
-		PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
-		// two workers
-		const activities = jobQueue.getJobQueue("activities");
-		PeriodicDoActivityTask(activities,this);
-		PeriodicDoActivityTask(activities,this);
+	async runAll(number_of_workers = 2){
+		// two workers		
+		for (var i = 0; i < number_of_workers; i++) {
+			PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
+			PeriodicDoActivityTask(jobQueue.getJobQueue("activities"),this);			
+		}
 	}
 }
 

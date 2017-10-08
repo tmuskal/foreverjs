@@ -236,14 +236,16 @@ var srv = {
 			var childWorkflow = childWorkflows[childWorkflowId];
 			var childJournal = journalService.getJournal(childWorkflowId);						
 			var state = await workflowStateFromHistory(childJournal);
-			logger.debug("wf state:",childWorkflowId,state);
+			logger.debug("wf state:",childWorkflowId,state,childWorkflow.failedCount);
+			if(childWorkflow.failed && childWorkflow.failedCount > 5){
+				// fail entire workflow
+  				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
+  				logger.warn("failing workflow:",workflowId);
+				await taint({workflowId});
+				return;
+			}	
 			if(childWorkflow.schedule && !childWorkflow.started){
-				if(childWorkflow.failedCount > 5){
-					// fail entire workflow
-      				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
-					await taint({workflowId});
-					continue;
-				}				
+							
 				// create a new workflow
 				// console.log("childWorkflow",childWorkflowId,childWorkflow);				
 				var classFn = workflowFactory[childWorkflow.class];
@@ -300,7 +302,7 @@ var srv = {
 				// run using mainDispatch
 
 			}
-			else if(!childWorkflow.finished){
+			else if(!childWorkflow.finished || !childWorkflow.failed ){
 				await this.taint({workflowId:childWorkflowId})
 			}
 		}

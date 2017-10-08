@@ -1,10 +1,12 @@
-lambda tasks
+fix lambda fails
+fix endless taints.
+handle decision task timeout
+add hearbeat action for tasks
 docker tasks - have socket to docker
 handle timeouts in taint
-handle decision task timeout
+reset timer in recovery
 make journal addition a transactional process - in task completion and in decision complete
 handle timeouts - task - schedule to start. schedule to complete. start to complete. heatbeat.
-add hearbeat action for tasks
 handle timeouts - main workflow - decision task start to complete, workflow schedule to complete (fail).
 handle timeouts - signals - timeout to signal
 tests:
