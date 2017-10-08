@@ -15,7 +15,7 @@ const plugin = {
 			return results;
 	},
 	getJournals: async function({debug}){			
-			const collections = db.collections();
+			const collections = await db.collections();
 			const results = collections.map(c => c.collectionName);
 			return results;
 	},	
