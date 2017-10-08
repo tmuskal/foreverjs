@@ -7,33 +7,25 @@ var url = config.get('MONGO_DB_CONNECTION_STRING') || 'mongodb://localhost:27017
 const plugin = {
 	init: async function(){		
 		// Connect using MongoClient
-		
+		this.db = await MongoClient.connect(url);		
 	},
 	getEntries: async function({id}){
-			const db = await MongoClient.connect(url);
-			var col = db.collection(id);			
+			var col = this.db.collection(id);			
 			var results = await col.find({}).toArray();
-			db.close();
 			return results;
 	},
-	getJournals: async function({debug}){
-			const db = await MongoClient.connect(url);
-			const collections = await db.collections();
+	getJournals: async function({debug}){			
+			const collections = await this.db.collections();
 			const results = collections.map(c => c.collectionName);
-			db.close();
 			return results;
 	},	
 	clear: async function({id}){
-			const db = await MongoClient.connect(url);
-			var col = db.collection(id);			
-			await col.drop();
-			db.close()
+			var col = this.db.collection(id);
+			await col.drop();			
 	},		
-	append: async function({entry,id}){
-			const db = await MongoClient.connect(url);
-			var col = db.collection(id);
-			await col.insertOne(entry);
-			db.close()
+	append: async function({entry,id}){			
+			var col = this.db.collection(id);
+			await col.insertOne(entry);		
 	}
 }
 
