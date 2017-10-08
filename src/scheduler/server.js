@@ -123,7 +123,7 @@ var srv = {
 					needANewDecisionTask = false;
 					break;					
 				case "DecisionTaskComplete":
-					lastDecisionTaskState = "complete";
+					lastDecisionTaskState = "complete";					
 					break;					
 				case "DecisionTaskFailed":
 					lastDecisionTaskState = "fail";
@@ -207,7 +207,7 @@ var srv = {
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];			
 		    var state = await activityStateFromHistory(taskId,journal);	
-		    logger.debug("activity state:",state)
+		    // logger.debug("activity state:",state)
 			if(task.schedule && !task.started){
 				if(task.failedCount > 5){
 					// fail entire workflow
@@ -222,7 +222,7 @@ var srv = {
 			else if(state.started){					
 	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 1){
 	      			// handle timeout
-	      			logger.debug("TimedOutActivity");
+	      			logger.info("TimedOutActivity");
       				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
       				needANewDecisionTask=true;
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
@@ -236,7 +236,7 @@ var srv = {
 			var childWorkflow = childWorkflows[childWorkflowId];
 			var childJournal = journalService.getJournal(childWorkflowId);						
 			var state = await workflowStateFromHistory(childJournal);
-			logger.debug("wf state:",childWorkflowId,state,childWorkflow.failedCount);
+			// logger.debug("wf state:",childWorkflowId,state,childWorkflow.failedCount);
 			if(childWorkflow.failed && childWorkflow.failedCount > 5){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
@@ -294,16 +294,17 @@ var srv = {
 		  				// throw e;
 		  			}
 		  			else{	  				
-		  				console.log(e);
-			  			await journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});			  		
+		  				logger.error("Child Workflow Failed",e);
+			  			await journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});
+			  			await this.taint({workflowId});
 			  			needANewDecisionTask = true;
 		  			}
 		  		}
 				// run using mainDispatch
 
 			}
-			else if(!childWorkflow.finished || !childWorkflow.failed ){
-				await this.taint({workflowId:childWorkflowId})
+			else if(!childWorkflow.finished && !childWorkflow.failed ){
+				await this.taint({workflowId:childWorkflowId});
 			}
 		}
 		if(needANewDecisionTask){
