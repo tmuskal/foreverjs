@@ -75,8 +75,8 @@ class Worker{
 	}
 	async runAll(number_of_workers = 2){
 		// two workers		
+		PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
 		for (var i = 0; i < number_of_workers; i++) {
-			PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
 			PeriodicDoActivityTask(jobQueue.getJobQueue("activities"),this);			
 		}
 	}
