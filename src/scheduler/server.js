@@ -304,7 +304,7 @@ var srv = {
 
 			}
 			else if(!childWorkflow.finished && !childWorkflow.failed ){
-				await this.taint({workflowId:childWorkflowId});
+				// await this.taint({workflowId:childWorkflowId});
 			}
 		}
 		if(needANewDecisionTask){
