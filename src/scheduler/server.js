@@ -40,7 +40,7 @@ var srv = {
 		return await run({className,name,args,id});
 	},
 	recover:async function (){
-		await delay(500);
+		await delay(5000);
 		const journals = await journalService.getJournals();
 		const journals_with_entries = await Promise.all(journals.result.map(async (j)=> {
 			const journal = journalService.getJournal(j);			
