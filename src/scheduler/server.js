@@ -304,7 +304,7 @@ var srv = {
 
 			}
 			else if(!childWorkflow.finished && !childWorkflow.failed ){
-				logger.warn("may need to taint workflow " + childWorkflowId);
+				logger.info("may need to taint workflow " + childWorkflowId);
 				// await this.taint({workflowId:childWorkflowId});
 			}
 		}
