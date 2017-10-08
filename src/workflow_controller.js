@@ -20,7 +20,10 @@ class WorkflowController{
 		var journal = journal || this.journal;
 		return activityStateFromHistory(dispatchId, journal)
 	}	
-	newDispatchID(){
+	newDispatchID(name){
+		if(name){
+			return this.workflowId +"."+name+"."+ (++this.lastDispatchId);
+		}
 		return this.workflowId +"."+ (++this.lastDispatchId);
 	}
 	async sleep(durationInSeconds){

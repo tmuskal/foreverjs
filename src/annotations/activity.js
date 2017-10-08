@@ -37,7 +37,7 @@ function activity() {
 	      	}
 	      	else{
 		      	// give a canonical id - workflowid + internal activity counter
-	      		var dispatchId = this.newDispatchID();
+	      		var dispatchId = this.newDispatchID(name);
 
 		      	var state = await this.stateFromHistory(dispatchId);
 		      	// logger.debug("state.started",state.started)

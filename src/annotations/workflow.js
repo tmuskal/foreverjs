@@ -123,7 +123,7 @@ function workflow() {
 		  	}
 		  	else{		  				  		
 		  		// child workflow
-	      		var dispatchId = this.newDispatchID();	   
+	      		var dispatchId = this.newDispatchID(this.constructor.name + "." + name);
 	      		var entries = await journalService.getJournal(dispatchId).getEntries();
 		      	var parent = entries.find(e=>e.type === 'WorkflowStarted'); 
 		      	if(parent)
