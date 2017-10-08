@@ -304,8 +304,8 @@ var srv = {
 
 			}
 			else if(!childWorkflow.finished && !childWorkflow.failed ){
-				logger.info("may need to taint workflow " + childWorkflowId);
-				// await this.taint({workflowId:childWorkflowId});
+				// logger.info("may need to taint workflow " + childWorkflowId);
+				await this.taint({workflowId:childWorkflowId});
 			}
 		}
 		if(needANewDecisionTask){
