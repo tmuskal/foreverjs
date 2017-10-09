@@ -1,5 +1,6 @@
 import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionScheduleActivity,WorkflowNoDecision,WorkflowTimerDecision,WorkflowDecisionContinueAsNew,WorkflowDecisionMultipleDecisions} from '../workflow_signals'
 import journalService from '../journal/client';
+const moment = require("moment");
 
 function workflow() {
    return function decorator(target, name, descriptor) {
