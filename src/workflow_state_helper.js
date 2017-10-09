@@ -18,6 +18,10 @@ async function workflowStateFromHistory(journal){
 		else if(entry.type == 'WorkflowFailed'){
 			state = {failed : true,result:entry.result};			
 		}
+		else if(entry.type == 'WorkflowTimeout'){
+			state = {timeout : true};			
+		}
+		
 		if(state){
 			state.last_activity = entry.date;
 		}

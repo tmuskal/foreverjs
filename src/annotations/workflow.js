@@ -137,10 +137,15 @@ function workflow() {
 		      		throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
 
 		  			// throw state.result;
-		  		}
+		  		}		  		
 		      	if(state.finished){
 		      		return state.result;
 		      	}
+
+		      	if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 10){
+	      			logger.warn("WorkflowTimeout", workflowId);
+      				await journal.append({type:"WorkflowTimeout", date: new Date(),dispatchId:this.workflowId});
+	      		}
 		      	throw new WorkflowNoDecision();
 
 		  		// else, find id in journal and see if need to redispatch or return existing result.
