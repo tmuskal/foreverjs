@@ -340,7 +340,8 @@ var srv = {
 var server = jayson.server(srv);
 
 const http = server.http()
-srv.recover().then(()=>{
-	http.listen(4003);
-})
+if(process.env.FJS_RECOVER === 'true'){
+	srv.recover();
+}
+
 export default http;
