@@ -18,6 +18,9 @@ async function workflowStateFromHistory(journal){
 		else if(entry.type == 'WorkflowFailed'){
 			state = {failed : true,result:entry.result};			
 		}
+		if(state){
+			state.last_activity = entry.date;
+		}
 	}	
 	// logger.debug("wf state: " + JSON.stringify(state));
 	return state;
