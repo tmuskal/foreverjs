@@ -220,10 +220,10 @@ var srv = {
 				}
 			}
 			else if(state.started){					
-	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 1){
+	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
 	      			// handle timeout
 	      			logger.info("TimedOutActivity");
-      				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
+      				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});
       				needANewDecisionTask=true;
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
 	      		}
