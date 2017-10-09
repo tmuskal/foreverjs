@@ -146,7 +146,7 @@ function workflow() {
 
 		      	if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 10){
 	      			logger.warn("WorkflowTimeout", this.workflowId);
-      				await journal.append({type:"WorkflowTimeout", date: new Date(),dispatchId:this.workflowId});
+      				await journalService.getJournal(dispatchId).append({type:"WorkflowTimeout", date: new Date(),dispatchId});
       				throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
 	      		}
 		      	throw new WorkflowNoDecision();
