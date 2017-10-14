@@ -223,6 +223,7 @@ var srv = {
 					continue;
 				}
 				else{
+					logger.debug("put job",taskId);
 					await activityTasks.putJob({workflowId,taskId});
 				}
 			}
