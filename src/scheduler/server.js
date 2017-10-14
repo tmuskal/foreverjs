@@ -268,7 +268,7 @@ var srv = {
 				await instance.journal.clear();
 
 		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
-		  		try{	  
+		  		// try{	  
 					// instance.innerDispatch = true;
 					// await instance[childWorkflow.name](...Object.values(childWorkflow.args));				  	
 					await instance.journal.append({type:"WorkflowStarted", date: new Date(), args:childWorkflow.args, name:childWorkflow.name, class:childWorkflow.class, parent:workflowId});
@@ -282,7 +282,7 @@ var srv = {
 					// this.taint();
 			  		// needANewDecisionTask = true;
 			  		// throw new WorkflowNoDecision();
-		  		}
+		  		// }
 		  		// catch(e){
 		  		// 	if(e instanceof WorkflowDecision){
 		  		// 		// this.taint();
