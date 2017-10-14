@@ -263,13 +263,17 @@ var srv = {
 				// console.log(classFn ,childWorkflow.class)
 				var instance = new classFn(childWorkflowId);
 				instance.parentWorkflow = workflowId;
+				
+				// TODO: need to enable for retries
 				await instance.journal.clear();
 
 		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
 		  		try{	  
-					instance.innerDispatch = true;
-					await instance[childWorkflow.name](...Object.values(childWorkflow.args));
-
+					// instance.innerDispatch = true;
+					// await instance[childWorkflow.name](...Object.values(childWorkflow.args));				  	
+					await instance.journal.append({type:"WorkflowStarted", date: new Date(), args:childWorkflow.args, childWorkflow.name, class:childWorkflow.class, parent:workflowId});
+				  	await instance.journal.append({type:"DecisionTaskSchedule", date: new Date()});
+					await decisionTasks.putJob({workflowId:childWorkflowId});
 					// console.log("res", res);
       				// instance.journal.append({type:"WorkflowComplete", date: new Date(), result:res,name:childWorkflow.name,class:childWorkflow.class,id:childWorkflowId,parent:this.workflowId});
 
@@ -279,37 +283,37 @@ var srv = {
 			  		// needANewDecisionTask = true;
 			  		// throw new WorkflowNoDecision();
 		  		}
-		  		catch(e){
-		  			if(e instanceof WorkflowDecision){
-		  				// this.taint();
-		  				// needANewDecisionTask = true;
-						if(e instanceof WorkflowNoDecision){
-				    	}
-				    	if (e instanceof WorkflowDecisionScheduleActivity) {
-				    		// add to journal
-				    		await instance.journal.append({type:"ScheduleActivity", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name});
-				    	}
-				    	else if(e instanceof WorkflowDecisionScheduleWorkflow){
-				    		// add to journal
-				    		await instance.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
-				    	}
-				    	else if(e instanceof WorkflowTimerDecision){
-				    		await instance.journal.append({type:"TimerSetup", date: new Date(),timerId:e.timerId,duration:e.duration});
-				    		await instance.scheduler.scheduleTimer(e.duration,e.timerId);
-				    	}				    	
-				    	// current decisionTask execution id
-				    	// this.journal.append({type:"DecisionTaskComplete", date: new Date()});
-						// notify scheduler		
-				    	// this.scheduler.taint();		  				
-		  				// throw e;
-		  			}
-		  			else{	  				
-		  				logger.error("Child Workflow Failed",e);
-			  			await journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});
-			  			await this.taint({workflowId});
-			  			needANewDecisionTask = true;
-		  			}
-		  		}
+		  		// catch(e){
+		  		// 	if(e instanceof WorkflowDecision){
+		  		// 		// this.taint();
+		  		// 		// needANewDecisionTask = true;
+						// if(e instanceof WorkflowNoDecision){
+				  //   	}
+				  //   	if (e instanceof WorkflowDecisionScheduleActivity) {
+				  //   		// add to journal
+				  //   		await instance.journal.append({type:"ScheduleActivity", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name});
+				  //   	}
+				  //   	else if(e instanceof WorkflowDecisionScheduleWorkflow){
+				  //   		// add to journal
+				  //   		await instance.journal.append({type:"ScheduleChildWorkflow", date: new Date(), dispatchId:e.dispatchId, args:e.args,name:e.name,class:e.class});
+				  //   	}
+				  //   	else if(e instanceof WorkflowTimerDecision){
+				  //   		await instance.journal.append({type:"TimerSetup", date: new Date(),timerId:e.timerId,duration:e.duration});
+				  //   		await instance.scheduler.scheduleTimer(e.duration,e.timerId);
+				  //   	}				    	
+				  //   	// current decisionTask execution id
+				  //   	// this.journal.append({type:"DecisionTaskComplete", date: new Date()});
+						// // notify scheduler		
+				  //   	// this.scheduler.taint();		  				
+		  		// 		// throw e;
+		  		// 	}
+		  		// 	else{	  				
+		  		// 		logger.error("Child Workflow Failed",e);
+			  	// 		await journal.append({type:"FailedChildWorkflow", date: new Date(), error:e, dispatchId:childWorkflowId});
+			  	// 		await this.taint({workflowId});
+			  	// 		needANewDecisionTask = true;
+		  		// 	}
+		  		// }
 				// run using mainDispatch
 
 			}
