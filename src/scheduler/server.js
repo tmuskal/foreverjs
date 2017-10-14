@@ -214,8 +214,9 @@ var srv = {
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];			
 		    var state = await activityStateFromHistory(taskId,journal);	
-		    // logger.debug("activity state:",state)
+		    logger.debug("activity state:",task,state);
 			if(task.schedule && !task.started){
+				logger.debug("scheduled but not started");
 				if(task.failedCount > 5){
 					// fail entire workflow
       				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' });
