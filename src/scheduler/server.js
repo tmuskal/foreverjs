@@ -271,7 +271,7 @@ var srv = {
 		  		try{	  
 					// instance.innerDispatch = true;
 					// await instance[childWorkflow.name](...Object.values(childWorkflow.args));				  	
-					await instance.journal.append({type:"WorkflowStarted", date: new Date(), args:childWorkflow.args, childWorkflow.name, class:childWorkflow.class, parent:workflowId});
+					await instance.journal.append({type:"WorkflowStarted", date: new Date(), args:childWorkflow.args, name:childWorkflow.name, class:childWorkflow.class, parent:workflowId});
 				  	await instance.journal.append({type:"DecisionTaskSchedule", date: new Date()});
 					await decisionTasks.putJob({workflowId:childWorkflowId});
 					// console.log("res", res);
