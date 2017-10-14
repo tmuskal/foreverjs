@@ -75,8 +75,7 @@ var srv = {
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		await decisionTasks.putJob({workflowId:workflowId});
 	},	
-	taint: async function({workflowId}){
-		logger.debug('in taint',workflowId);
+	taint: async function({workflowId}){		
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
@@ -84,6 +83,7 @@ var srv = {
 		var entries = await journal.getEntries();
 		// console.log("entries",entries)
 		// add schedule if last activity completed or failed
+		logger.debug('in taint',workflowId,entries.length);
 		var tasks = {}
 		var childWorkflows = {}
 		var lastDecisionTaskState = "notfound"
@@ -179,7 +179,8 @@ var srv = {
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FinishedChildWorkflow", date: entry.date, result:entry.result, dispatchId:entry.id});
 						// await instance.scheduler.taint();
-						await taint({workflowId:parent.parent});						
+						await taint({workflowId:parent.parent});
+						return;
 					}
 					// await journal.clear();
 					break;
@@ -214,7 +215,7 @@ var srv = {
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];			
 		    var state = await activityStateFromHistory(taskId,journal);	
-		    logger.debug("activity state:",task,state);
+		    logger.debug("activity state:",task,state,taskId);
 			if(task.schedule && !task.started){
 				logger.debug("scheduled but not started");
 				if(task.failedCount > 5){
