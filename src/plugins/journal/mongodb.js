@@ -4,13 +4,15 @@ import config from "../../config/config";
 // Connection url
 var url = config.get('MONGO_DB_CONNECTION_STRING') || 'mongodb://localhost:27017/test2';
 let db;
+// TODO: lookup between id and collection name
 const plugin = {
 	init: async function(){		
 		// Connect using MongoClient
 		db = await MongoClient.connect(url);		
 	},
 	getEntries: async function({id}){
-			var col = db.collection(id);			
+
+			var col = db.collection(id);
 			var results = await col.find({}).toArray();
 			return results;
 	},

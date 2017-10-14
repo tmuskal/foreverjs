@@ -1,6 +1,6 @@
 {
   "name": "foreverjs",
-  "version": "1.1.124",
+  "version": "1.1.125",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "jayson": "^2.0.3",
     "moment": "^2.18.1",
     "mongodb": "^2.2.31",
+    "murmur32": "^1.0.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {

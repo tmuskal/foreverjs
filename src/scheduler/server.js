@@ -88,6 +88,7 @@ var srv = {
 		var childWorkflows = {}
 		var lastDecisionTaskState = "notfound"
 		var needANewDecisionTask = true;
+		var lastDecisionTaskDate;
 		for(var i =0; i < entries.length; i++){
 			var entry = entries[i];
 			switch(entry.type){
@@ -120,6 +121,7 @@ var srv = {
 					break;
 				case "DecisionTaskStarted":
 					lastDecisionTaskState = "start";
+					lastDecisionTaskDate = entry.date;
 					needANewDecisionTask = false;
 					break;					
 				case "DecisionTaskComplete":
@@ -175,7 +177,7 @@ var srv = {
 						// console.log(classFn ,childWorkflow.class)
 						// var instance = new classFn(entry.parent);
 						// instance.parentWorkflow = workflowId;
-						await parentJournal.append({type:"FinishedChildWorkflow", date: new Date(), result:entry.result, dispatchId:entry.id});
+						await parentJournal.append({type:"FinishedChildWorkflow", date: entry.date, result:entry.result, dispatchId:entry.id});
 						// await instance.scheduler.taint();
 						await taint({workflowId:parent.parent});						
 					}
@@ -194,14 +196,19 @@ var srv = {
 						// console.log(classFn ,childWorkflow.class)
 						// var instance = new classFn(parent.parent);
 						// instance.parentWorkflow = workflowId;
-						await parentJournal.append({type:"FailedChildWorkflow", date: new Date(), result:entry.result, dispatchId:workflowId});
+						await parentJournal.append({type:"FailedChildWorkflow", date: entry.date, result:entry.result, dispatchId:workflowId});
 						await taint({workflowId:parent.parent});
 						return;
 					}
 					break;					
 			}
 		}
-		
+		if(lastDecisionTaskState === 'started' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 5){
+			await journal.append({type:"DecisionTaskTimeOut", date: new Date()});
+			await taint({workflowId});
+			return;
+		}
+
 		var tasksIds = Object.keys(tasks);
 		for(var i = 0; i < tasksIds.length; i++){
 			var taskId = tasksIds[i];
