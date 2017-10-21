@@ -190,6 +190,7 @@ var srv = {
 					// needANewDecisionTask = false;										
 					// taint parent
 					// console.log("parent",parent);
+					logger.warn("Taint - FailedChildWorkflow " + workflowId);
 					if(parent && parent.parent){
 	    				// console.log(parent.parent);
 						// discover parent
@@ -200,7 +201,6 @@ var srv = {
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FailedChildWorkflow", date: entry.date, result:entry.result, dispatchId:workflowId});
 						await taint({workflowId:parent.parent});
-						logger.warn("FailedChildWorkflow " + workflowId);
 						return;
 					}
 					break;					
@@ -208,6 +208,7 @@ var srv = {
 		}
 		if(lastDecisionTaskState === 'started' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 5){
 			await journal.append({type:"DecisionTaskTimeOut", date: new Date()});
+			logger.warn("Taint - DecisionTaskTimeOut " + workflowId);
 			await taint({workflowId});
 			return;
 		}
@@ -268,7 +269,7 @@ var srv = {
 				
 				// TODO: need to enable for retries
 				await instance.journal.clear();
-
+				logger.info("start child workflow " + childWorkflowId);
 		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
 		  		// try{	  
 					// instance.innerDispatch = true;
