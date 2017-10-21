@@ -215,7 +215,7 @@ var srv = {
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];			
 		    var state = await activityStateFromHistory(taskId,journal);	
-		    logger.debug("activity state:",task,state,taskId);
+		    logger.debug("activity state:",task,taskId);
 			if(task.schedule && !task.started){
 				logger.debug("scheduled but not started");
 				if(task.failedCount > 5){
@@ -318,7 +318,7 @@ var srv = {
 
 			}
 			else if(!childWorkflow.finished && !childWorkflow.failed ){
-				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 25){
+				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
 	      			// handle timeout
 	      			// logger.info("TimedOutActivity");
 	      			// logger.info("TimedOutWorkflow");
