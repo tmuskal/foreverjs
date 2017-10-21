@@ -171,6 +171,7 @@ var srv = {
 					// release waiting callbacks
 					// needANewDecisionTask = false;										
 					// taint parent					
+					logger.info("WorkflowComplete " + workflowId);
 					if(parent && parent.parent){
 	    				var parentJournal = journalService.getJournal(parent.parent);
 						// var classFn = workflowFactory[entry.class];
@@ -179,7 +180,7 @@ var srv = {
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FinishedChildWorkflow", date: entry.date, result:entry.result, dispatchId:entry.id});
 						// await instance.scheduler.taint();
-						await taint({workflowId:parent.parent});
+						await taint({workflowId:parent.parent});						
 						return;
 					}
 					// await journal.clear();
@@ -199,6 +200,7 @@ var srv = {
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FailedChildWorkflow", date: entry.date, result:entry.result, dispatchId:workflowId});
 						await taint({workflowId:parent.parent});
+						logger.warn("FailedChildWorkflow " + workflowId);
 						return;
 					}
 					break;					
@@ -337,7 +339,7 @@ var srv = {
 		  	await journal.append({type:"DecisionTaskSchedule", date: new Date()});
 			await decisionTasks.putJob({workflowId:workflowId});
 		}
-
+		logger.info("Done tainting " + workflowId);
 		// can be done periodically
 		// check for timeouts: decision task timeouts, child workflow timeouts, main workflow timeouts, activity timeouts (heartbeat, scheduletocomplete, scheduletostart, starttocomplete)
 		// check for needed dispatch for activities
