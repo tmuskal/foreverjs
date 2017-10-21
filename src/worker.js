@@ -73,10 +73,11 @@ async function PeriodicDoActivityTask(queue, worker){
 class Worker{
 	constructor(){
 	}
-	async runAll(number_of_workers = 2){
-		// two workers		
-		PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
-		for (var i = 0; i < number_of_workers; i++) {
+	async runAll(){		
+		for (var i = 0; i < process.env.FJS_DECISION_WORKERS || 0; i++) {
+			PeriodicDoDecisionTask(jobQueue.getJobQueue("decisions"),this);
+		}
+		for (var i = 0; i < process.env.FJS_ACTIVITY_WORKERS || 0; i++) {
 			PeriodicDoActivityTask(jobQueue.getJobQueue("activities"),this);			
 		}
 	}

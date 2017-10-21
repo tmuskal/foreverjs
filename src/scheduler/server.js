@@ -318,7 +318,7 @@ var srv = {
 
 			}
 			else if(!childWorkflow.finished && !childWorkflow.failed ){
-				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
+				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 25){
 	      			// handle timeout
 	      			// logger.info("TimedOutActivity");
 	      			// logger.info("TimedOutWorkflow");
