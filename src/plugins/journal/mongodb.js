@@ -7,6 +7,7 @@ let db;
 // TODO: lookup between id and collection name
 const plugin = {
 	init: async function(){		
+		
 		// Connect using MongoClient
 		try{
 			db = await MongoClient.connect(url);
