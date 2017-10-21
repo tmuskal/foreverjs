@@ -11,7 +11,6 @@ function delay(time) {
 
 async function DoDecisionTask(job){
 	// console.log("need to do decision for ", job);
-	
 	try{
 		logger.debug("DoDecisionTask " + job.workflowId);
 		var journal = journalService.getJournal(job.workflowId);
@@ -24,9 +23,10 @@ async function DoDecisionTask(job){
 		var instance = new classFn(job.workflowId);
 		instance.mainRun = true;
 		await instance[params.name](...Object.values(params.args));
+		logger.debug("DONE - DoDecisionTask " + job.workflowId);
 	}
 	catch(e){
-		console.log(e);
+		logger.warn("FAIL - DoDecisionTask " + job.workflowId, e);
 	}
 }
 async function DoActivityTask(job){
@@ -44,10 +44,12 @@ async function DoActivityTask(job){
 		await instance.journal.append({type:"StartedActivity", date: new Date(), dispatchId, args:paramsActivity.args,name:paramsActivity.name});		
 		var res = await instance[paramsActivity.name](...Object.values(paramsActivity.args));			
 		await instance.journal.append({type:"FinishedActivity", date: new Date(), dispatchId, result: res});	
+		logger.debug("DONE - DoActivityTask " + job.taskId);
 	}
 	catch(e){
 		logger.warn(e);
 		await instance.journal.append({type:"FailedActivity", date: new Date(), dispatchId, error:e});	
+		logger.debug("FAILED - DoActivityTask " + job.taskId);
 	}
 	// console.log(instance.journal.getEntries());
 	await instance.scheduler.taint();
