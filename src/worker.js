@@ -57,18 +57,26 @@ async function DoActivityTask(job){
 async function PeriodicDoDecisionTask(queue, worker){
 	if(worker.stop)
 		return;
-	var job = await queue.getJob();
-	if(job)
-		await DoDecisionTask(job);
+	try{
+		var job = await queue.getJob();
+		if(job)
+			await DoDecisionTask(job);
+	}
+	catch(e){	
+	}
 	await delay(100)
 	PeriodicDoDecisionTask(queue, worker);
 }
 async function PeriodicDoActivityTask(queue, worker){
 	if(worker.stop)
 		return;
-	var job = await queue.getJob();
-	if(job)
-		await DoActivityTask(job);
+	try{
+		var job = await queue.getJob();
+		if(job)
+			await DoActivityTask(job);
+	}
+	catch(e){
+	}
 	await delay(100)
 	PeriodicDoActivityTask(queue, worker);
 }	
