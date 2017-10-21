@@ -8,10 +8,15 @@ let db;
 const plugin = {
 	init: async function(){		
 		// Connect using MongoClient
-		db = await MongoClient.connect(url);		
+		try{
+			db = await MongoClient.connect(url);
+		}
+		catch(e){
+			process.exit(-1);
+		}
+		
 	},
 	getEntries: async function({id}){
-
 			var col = db.collection(id);
 			var results = await col.find({}).toArray();
 			return results;
