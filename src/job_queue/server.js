@@ -6,6 +6,7 @@ const innerQueues = {};
 var server = jayson.server({
 	putJob: async function({job,id}){
 		// console.log("putJob",id,job)
+		logger.debug("put job " + id,job);
 		var innerQueue = innerQueues[id];
 		if(!innerQueue){
 			innerQueue = [];

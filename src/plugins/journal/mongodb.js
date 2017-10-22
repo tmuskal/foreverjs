@@ -19,7 +19,7 @@ const plugin = {
 	},
 	getEntries: async function({id}){
 			var col = db.collection(id);
-			var results = await col.find({}).toArray();
+			var results = await col.find({}).sort( { date: -1 } ).toArray();
 			return results;
 	},
 	getJournals: async function({debug}){			

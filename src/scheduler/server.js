@@ -228,7 +228,7 @@ var srv = {
 					// fail entire workflow
       				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' });
 					await taint({workflowId});
-					continue;
+					return;
 				}
 				else{
 					logger.debug("put job",taskId);
