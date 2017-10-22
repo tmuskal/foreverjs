@@ -84,6 +84,7 @@ var srv = {
 	    var journal = journalService.getJournal(workflowId);
 	    var parent;
 		await delay(500);
+		await journal.append({type:"Taint", date: new Date()});
 		var entries = await journal.getEntries();
 		// console.log("entries",entries)
 		// add schedule if last activity completed or failed
@@ -272,7 +273,8 @@ var srv = {
 				instance.parentWorkflow = workflowId;
 				
 				// TODO: need to enable for retries
-				// await instance.journal.clear();
+				// await instance.journal.clear();		
+				// await delay(1000);
 				logger.info("start child workflow " + childWorkflowId);
 		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
 		  		// try{	  
@@ -335,6 +337,9 @@ var srv = {
       				// await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
       				// needANewDecisionTask=true;
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
+	      		}
+	      		else{
+	      			await taint({workflowId:childWorkflowId});
 	      		}
 				// logger.info("may need to taint workflow " + childWorkflowId);
 				// await this.taint({workflowId:childWorkflowId});
