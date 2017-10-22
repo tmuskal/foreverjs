@@ -3,7 +3,7 @@ var winston = require('winston');
 export default new (winston.Logger)({
   transports: [
     new (winston.transports.Console)({
-      colorize: true,      
+      colorize: false,      
       level: 'debug'
     }),   
   ]

@@ -122,7 +122,7 @@ var srv = {
 				case "DecisionTaskStarted":
 					lastDecisionTaskState = "start";
 					lastDecisionTaskDate = entry.date;
-					needANewDecisionTask = false;
+					// needANewDecisionTask = false;
 					break;					
 				case "DecisionTaskComplete":
 					lastDecisionTaskState = "complete";					
@@ -181,8 +181,8 @@ var srv = {
 						await parentJournal.append({type:"FinishedChildWorkflow", date: entry.date, result:entry.result, dispatchId:entry.id});
 						// await instance.scheduler.taint();
 						await taint({workflowId:parent.parent});						
-						return;
 					}
+					return;
 					// await journal.clear();
 					break;
 				case 'WorkflowFailed':
@@ -201,8 +201,8 @@ var srv = {
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FailedChildWorkflow", date: entry.date, result:entry.result, dispatchId:workflowId});
 						await taint({workflowId:parent.parent});
-						return;
 					}
+					return;
 					break;					
 			}
 		}
@@ -249,7 +249,7 @@ var srv = {
 			var childWorkflow = childWorkflows[childWorkflowId];
 			var childJournal = journalService.getJournal(childWorkflowId);						
 			var state = await workflowStateFromHistory(childJournal);
-			// logger.debug("wf state:",childWorkflowId,state,childWorkflow.failedCount);
+			logger.debug("wf state:",childWorkflowId,childWorkflow);
 			if(childWorkflow.failed && childWorkflow.failedCount > 5){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
