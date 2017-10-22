@@ -84,8 +84,13 @@ var srv = {
 	    var journal = journalService.getJournal(workflowId);
 	    var parent;
 		await delay(500);
-		await journal.append({type:"Taint", date: new Date()});
 		var entries = await journal.getEntries();
+		if(entries.length >0 && entries[entries.length-1].type === 'Taint'){
+			logger.debug('skip duplicate taint',workflowId);
+			return;
+		}
+		await journal.append({type:"Taint", date: new Date()});
+		
 		// console.log("entries",entries)
 		// add schedule if last activity completed or failed
 		logger.debug('in taint',workflowId,entries.length);
@@ -93,10 +98,7 @@ var srv = {
 		var childWorkflows = {}
 		var lastDecisionTaskState = "notfound"
 		var needANewDecisionTask = true;
-		var lastDecisionTaskDate;
-		if(entries.length >0 && entries[entries.length-1].type === 'Taint'){
-			return;
-		}
+		var lastDecisionTaskDate;		
 		for(var i =0; i < entries.length; i++){
 			var entry = entries[i];
 			switch(entry.type){
