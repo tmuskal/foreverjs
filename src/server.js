@@ -2,6 +2,7 @@ import jobQueueServer from './job_queue/server';
 import journalServer from './journal/server';
 import schedulerServer from './scheduler/server';
 import workerServer from './workers/server';
+import logger from './logger';
 
 function startAll(){
     if(process.env.ENBALE_JOBQUEUE)
@@ -10,7 +11,7 @@ function startAll(){
         journalServer.listen(4001);
     if(process.env.ENBALE_SCHEDULER)
         schedulerServer.listen(4003);
-    workerServer.runAll().then(()=>console.log("worker running"));
+    workerServer.runAll().then(()=>logger.info("ready"));
 
 }
 function stopAll(){
