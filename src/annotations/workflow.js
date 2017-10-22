@@ -40,7 +40,7 @@ function workflow() {
 			  	catch(e){
 			  		async function handleDecision(e){
 				    	if(e instanceof WorkflowNoDecision){
-				    		logger.debug("no decisions for " + this.workflowId);
+				    		// logger.debug("no decisions for " + this.workflowId);
 				    	}
 				    	if (e instanceof WorkflowDecisionScheduleActivity) {
 				    		// add to journal
@@ -58,6 +58,9 @@ function workflow() {
 				    		await this.journal.append({type:"ContinueAsNew", date: new Date(),args:e.args,name:name,class:this.constructor.name,dispatchId:this.workflowId + "_1"});
 				    	}
 				    	else if (e instanceof WorkflowDecisionMultipleDecisions){
+				    		if(e.decisions.filter(d=>!(d instanceof WorkflowNoDecision)).length === 0){
+				    			logger.debug("no decisions for multi " + this.workflowId);
+				    		}
 				    		return await Promise.all(e.decisions.map(decision=>handleDecision.bind(this)(decision)));
 				    	}
 				    	else if(! (e instanceof WorkflowDecision)){
@@ -73,6 +76,9 @@ function workflow() {
 			  		// console.log(e);
 			  		var res = handleDecision.bind(this)(e);
 				    if (e instanceof WorkflowDecision) {
+				    	if(e instanceof WorkflowNoDecision){
+				    			logger.debug("no decisions for " + this.workflowId);
+				    	}
 				    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
 						// notify scheduler		
 				    	await this.scheduler.taint();
