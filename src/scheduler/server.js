@@ -16,7 +16,7 @@ function delay(time) {
 }
 
 async function run({className,name,args,id}){
-	try{
+	try{		
 		var classFn = workflowFactory[className];
 		var workflow = new classFn(id);
 		workflow.mainDispatch = true;
@@ -28,6 +28,8 @@ async function run({className,name,args,id}){
 		// 	await delay(1000);
 		// 	return await run({className,name,args,id});
 		// }
+		await srv.taint({id});
+
 		logger.info(e);
 		throw e;
 	}		
