@@ -138,12 +138,12 @@ function workflow() {
 		      		parent = parent.parent;		      	
 		      		if(!parent){
 		      			logger.error("child workflow with no parent " + dispatchId)
-		      			throw new Error("child workflow with no parent " + dispatchId);
+		      			// throw new Error("child workflow with no parent " + dispatchId);
 		      		}
 		      	}
 		      	else{
-		      		logger.error("child workflow with no parent " + dispatchId)
-		      		throw new Error("child workflow with no parent " + dispatchId);
+		      		// logger.warn("child workflow with no start " + dispatchId)
+		      		// throw new Error("child workflow with start " + dispatchId);
 		      	}
 
 		      	var state = await this.workflowStateFromHistory(theJournal);
