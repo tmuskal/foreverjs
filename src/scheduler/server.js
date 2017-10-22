@@ -86,9 +86,10 @@ var srv = {
 		await delay(500);
 		var entries = await journal.getEntries();
 		if(entries.length >0 && entries[entries.length-1].type === 'Taint'){
-			if(moment().diff(moment(entries[entries.length-1].date).utc(), 'seconds') > 10)
-			logger.debug('skip duplicate taint',workflowId);
-			return;
+			if(moment().diff(moment(entries[entries.length-1].date).utc(), 'seconds') < 10){
+				logger.debug('skip duplicate taint',workflowId);
+				return;				
+			}
 		}
 		await journal.append({type:"Taint", date: new Date(),entries_count:entries.length});
 		
