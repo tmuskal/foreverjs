@@ -20,14 +20,15 @@ async function run({className,name,args,id}){
 		var classFn = workflowFactory[className];
 		var workflow = new classFn(id);
 		workflow.mainDispatch = true;
+		logger.info("running " + id);
 		return await workflow[name](...args);
 	}
 	catch(e){
-		if (e instanceof WorkflowDecision) {
-			await delay(1000);
-			return await run({className,name,args,id});
-		}
-		console.log(e);
+		// if (e instanceof WorkflowDecision) {
+		// 	await delay(1000);
+		// 	return await run({className,name,args,id});
+		// }
+		logger.info(e);
 		throw e;
 	}		
 }
