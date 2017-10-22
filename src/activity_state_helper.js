@@ -9,10 +9,10 @@ async function stateFromHistory(dispatchId, journal){
 		if(entry.dispatchId == dispatchId){
 			// if schedule event, set state to scheduled
 			if(entry.type == 'ScheduleActivity' || entry.type == 'ScheduleChildWorkflow'){
-				state = {scheduled : true, name:entry.name, args:entry.args};
+				state = {scheduled : true, name:entry.name, args:entry.args,failures};
 			}
 			else if(entry.type == 'StartedActivity' || entry.type == 'StartChildWorkflow'){
-				state = {started : true, name:entry.name, args:entry.args, last_activity: entry.date};
+				state = {started : true, name:entry.name, args:entry.args, last_activity: entry.date,failures};
 			}
 			else if(entry.type == 'Heartbeat' && state.started){
 				state.last_activity = entry.date;
@@ -21,9 +21,12 @@ async function stateFromHistory(dispatchId, journal){
 				failures++;
 				state = {failed : true, failures};
 			}
+			else if(entry.type == 'QueueActivity'){
+				state = {queue : true, failures};
+			}			
 			else if(entry.type == 'TimedOutActivity' || entry.type == 'TimedOutChildWorkflow'){
 				timedOut++;
-				state = {timedOut : true,timedOut};
+				state = {timedOut : true,timedOut,failures};
 			}
 			else if(entry.type == 'FinishedActivity' || entry.type == 'FinishedChildWorkflow'){
 				state = {finished : true,result:entry.result};

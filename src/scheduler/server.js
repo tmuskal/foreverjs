@@ -114,6 +114,9 @@ var srv = {
 						failedCount = tasks[entry.dispatchId].failedCount;
 					tasks[entry.dispatchId] = {schedule:true,failedCount};
 					break;
+				case "QueueActivity":
+					tasks[entry.dispatchId].queued = true;
+					break;					
 				case "FailedActivity":
 					needANewDecisionTask = true;
 					tasks[entry.dispatchId].failed = true;
@@ -126,15 +129,21 @@ var srv = {
 					break;
 				case "StartedActivity":
 					tasks[entry.dispatchId].started = true;
+					tasks[entry.dispatchId].queued = false;
 					break;					
 				case "DecisionTaskSchedule":
 					lastDecisionTaskState = "schedule";
 					needANewDecisionTask = false;
 					break;
+				case "DecisionTaskQueued":
+					lastDecisionTaskState = "queue";
+					lastDecisionTaskDate = entry.date;
+					needANewDecisionTask = false;
+					break;					
 				case "DecisionTaskStarted":
 					lastDecisionTaskState = "start";
 					lastDecisionTaskDate = entry.date;
-					// needANewDecisionTask = false;
+					needANewDecisionTask = false;
 					break;					
 				case "DecisionTaskComplete":
 					lastDecisionTaskState = "complete";					
@@ -230,9 +239,12 @@ var srv = {
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];			
 		    var state = await activityStateFromHistory(taskId,journal);	
+		    if(task.queued){
+		    	continue;
+		    }
 		    if(!task.finished){
 				logger.debug("activity state:",task,taskId);
-			}		    
+			}
 			if(task.schedule && !task.started){
 				logger.debug("scheduled but not started");
 				if(task.failedCount > 5){
@@ -356,7 +368,7 @@ var srv = {
 				// await this.taint({workflowId:childWorkflowId});
 			}
 		}
-		if(needANewDecisionTask){
+		if(needANewDecisionTask && lastDecisionTaskState !== 'queue'){
 		  	await journal.append({type:"DecisionTaskSchedule", date: new Date()});
 			await decisionTasks.putJob({workflowId:workflowId});
 		}
