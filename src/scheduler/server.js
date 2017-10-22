@@ -327,10 +327,10 @@ var srv = {
 				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
 	      			// handle timeout
 	      			// logger.info("TimedOutActivity");
-	      			logger.info("TimedOutWorkflow - tainting");
+	      			logger.info("TimedOutWorkflow - tainting", childWorkflowId);
       				// await journal.append({type:"TimedOutChildWorkflow", date: new Date(),dispatchId:workflowId});
       				// needANewDecisionTask=true;
-	      			await this.taint({workflowId:childWorkflowId});
+	      			await taint({workflowId:childWorkflowId});
       				// await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
       				// needANewDecisionTask=true;
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");

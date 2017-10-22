@@ -67,7 +67,7 @@ function workflow() {
 					    	console.log('real error',e);
 					    	// mark failed
 					    	await this.journal.append({type:"DecisionTaskFailed", date: new Date(),error:e});
-					    	await this.scheduler.taint();
+					    	// await this.scheduler.taint();
 					    	throw e;
 				    	}
 				    	return e;
@@ -79,13 +79,14 @@ function workflow() {
 				    	if(e instanceof WorkflowNoDecision){
 				    			logger.debug("no decisions for " + this.workflowId);
 				    	}
-				    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
-						// notify scheduler		
-				    	await this.scheduler.taint();
 						// complete decision task
-				    	return res;
+				    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
+				    	// await this.scheduler.taint();
 
 				    }
+					// notify scheduler		
+					await this.scheduler.taint();
+			    	return res;
 			  	}		  		
 		  	}
 		  	else if(this.mainDispatch){

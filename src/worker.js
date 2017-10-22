@@ -61,10 +61,12 @@ async function PeriodicDoDecisionTask(queue, worker){
 		var job = await queue.getJob();
 		if(job)
 			await DoDecisionTask(job);
+		else{
+			await delay(500);
+		}
 	}
 	catch(e){	
-	}
-	await delay(100)
+	}	
 	PeriodicDoDecisionTask(queue, worker);
 }
 async function PeriodicDoActivityTask(queue, worker){
@@ -74,10 +76,12 @@ async function PeriodicDoActivityTask(queue, worker){
 		var job = await queue.getJob();
 		if(job)
 			await DoActivityTask(job);
+		else{
+			await delay(500);
+		}
 	}
 	catch(e){
-	}
-	await delay(100)
+	}	
 	PeriodicDoActivityTask(queue, worker);
 }	
 class Worker{
