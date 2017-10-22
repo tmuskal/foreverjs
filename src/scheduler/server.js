@@ -218,7 +218,7 @@ var srv = {
 					break;					
 			}
 		}
-		if(lastDecisionTaskState === 'started' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 5){
+		if(lastDecisionTaskState === 'start' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 5){
 			await journal.append({type:"DecisionTaskTimeOut", date: new Date()});
 			logger.warn("Taint - DecisionTaskTimeOut " + workflowId);
 			await taint({workflowId});
