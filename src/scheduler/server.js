@@ -34,8 +34,8 @@ async function run({className,name,args,id}){
 		throw e;
 	}		
 }
-async function taint({workflowId}){
-	return await srv.taint({workflowId});
+async function taint({workflowId,recovery}){
+	return await srv.taint({workflowId,recovery});
 }
 
 var srv = {
@@ -53,7 +53,7 @@ var srv = {
 
 			if(!entries.find(e=>e.type==="WorkflowComplete")){
 				logger.debug("Recovering",j)
-				return srv.taint({workflowId: j});
+				return srv.taint({workflowId: j,recovery:true});
 			}
 			else
 			{
@@ -78,7 +78,7 @@ var srv = {
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		await decisionTasks.putJob({workflowId:workflowId});
 	},	
-	taint: async function({workflowId}){		
+	taint: async function({workflowId,recovery}){
 		var decisionTasks = JobQueueServer.getJobQueue("decisions");
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
@@ -91,7 +91,7 @@ var srv = {
 				return;				
 			}
 		}
-		await journal.append({type:"Taint", date: new Date(),entries_count:entries.length});
+		await journal.append({type:"Taint", date: new Date(),entries_count:entries.length,recovery});
 		
 		// console.log("entries",entries)
 		// add schedule if last activity completed or failed
@@ -115,7 +115,8 @@ var srv = {
 					tasks[entry.dispatchId] = {schedule:true,failedCount};
 					break;
 				case "QueueActivity":
-					tasks[entry.dispatchId].queued = true;
+					if(!recovery)
+						tasks[entry.dispatchId].queued = true;
 					break;					
 				case "FailedActivity":
 					needANewDecisionTask = true;
@@ -133,12 +134,14 @@ var srv = {
 					break;					
 				case "DecisionTaskSchedule":
 					lastDecisionTaskState = "schedule";
-					needANewDecisionTask = false;
+					// needANewDecisionTask = false;
 					break;
 				case "DecisionTaskQueued":
-					lastDecisionTaskState = "queue";
-					lastDecisionTaskDate = entry.date;
-					needANewDecisionTask = false;
+					if(!recovery){
+						lastDecisionTaskState = "queue";
+						lastDecisionTaskDate = entry.date;
+						needANewDecisionTask = false;						
+					}
 					break;					
 				case "DecisionTaskStarted":
 					lastDecisionTaskState = "start";
@@ -201,7 +204,7 @@ var srv = {
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FinishedChildWorkflow", date: entry.date, result:entry.result, dispatchId:entry.id});
 						// await instance.scheduler.taint();
-						await taint({workflowId:parent.parent});						
+						await taint({workflowId:parent.parent,recovery});						
 					}
 					return;
 					// await journal.clear();
@@ -221,7 +224,7 @@ var srv = {
 						// var instance = new classFn(parent.parent);
 						// instance.parentWorkflow = workflowId;
 						await parentJournal.append({type:"FailedChildWorkflow", date: entry.date, result:entry.result, dispatchId:workflowId});
-						await taint({workflowId:parent.parent});
+						await taint({workflowId:parent.parent,recovery});
 					}
 					return;
 					break;					
@@ -230,7 +233,7 @@ var srv = {
 		if(lastDecisionTaskState === 'start' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 5){
 			await journal.append({type:"DecisionTaskTimeOut", date: new Date()});
 			logger.warn("Taint - DecisionTaskTimeOut " + workflowId);
-			await taint({workflowId});
+			await taint({workflowId,recovery});
 			return;
 		}
 
@@ -250,7 +253,7 @@ var srv = {
 				if(task.failedCount > 5){
 					// fail entire workflow
       				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' });
-					await taint({workflowId});
+					await taint({workflowId,recovery});
 					return;
 				}
 				else{
@@ -282,7 +285,7 @@ var srv = {
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
   				logger.warn("failing workflow:",workflowId);
-				await taint({workflowId});
+				await taint({workflowId,recovery});
 				return;
 			}	
 			if(childWorkflow.schedule && !childWorkflow.started){
@@ -356,13 +359,13 @@ var srv = {
 	      			logger.info("TimedOutWorkflow - tainting", childWorkflowId);
       				// await journal.append({type:"TimedOutChildWorkflow", date: new Date(),dispatchId:workflowId});
       				// needANewDecisionTask=true;
-	      			await taint({workflowId:childWorkflowId});
+	      			await taint({workflowId:childWorkflowId,recovery});
       				// await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
       				// needANewDecisionTask=true;
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
 	      		}
 	      		else{
-	      			await taint({workflowId:childWorkflowId});
+	      			await taint({workflowId:childWorkflowId,recovery});
 	      		}
 				// logger.info("may need to taint workflow " + childWorkflowId);
 				// await this.taint({workflowId:childWorkflowId});
