@@ -252,7 +252,7 @@ var srv = {
 			var childWorkflow = childWorkflows[childWorkflowId];
 			var childJournal = journalService.getJournal(childWorkflowId);						
 			var state = await workflowStateFromHistory(childJournal);
-			logger.debug("wf state:",childWorkflowId,childWorkflow,state);
+			logger.debug("wf state:",childWorkflowId,childWorkflow,state.last_activity);
 			if(childWorkflow.failed && childWorkflow.failedCount > 5){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
