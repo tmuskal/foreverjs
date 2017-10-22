@@ -40,6 +40,7 @@ function workflow() {
 			  	catch(e){
 			  		async function handleDecision(e){
 				    	if(e instanceof WorkflowNoDecision){
+				    		logger.debug("no decisions for " + this.workflowId);
 				    	}
 				    	if (e instanceof WorkflowDecisionScheduleActivity) {
 				    		// add to journal
@@ -111,26 +112,43 @@ function workflow() {
 		  		if(state.finished){
 		  			return state.result;
 		  		}		  		
-		  		if(state.failed){
+		  		else if(state.failed){
 		  			throw state.result;
 		  		}		  				  		
-		  		if(state.notFound){
+		  		else if(state.notFound){
       				await this.journal.append({type:"WorkflowStarted", date: new Date(), args:arguments, name, class:this.constructor.name, parent:this.parentWorkflow});
 		  			await this.scheduler.taint();
 		  			throw new WorkflowNoDecision();
 		  		}
-		  		if(state.started){
+		  		else if(state.started){
 		  			throw new WorkflowNoDecision();
+		  		}
+		  		else {
+		  			logger.warn("innerDispatch in unknown state ", state, this.workflowId);
+		  			await this.scheduler.taint();
 		  		}
 		  	}
 		  	else{		  				  		
 		  		// child workflow
 	      		var dispatchId = this.newDispatchID(this.constructor.name + "." + name);
-	      		var entries = await journalService.getJournal(dispatchId).getEntries();
+	      		var theJournal = journalService.getJournal(dispatchId);
+	      		var entries = await theJournal.getEntries();
 		      	var parent = entries.find(e=>e.type === 'WorkflowStarted'); 
-		      	if(parent)
+		      	if(parent){
 		      		parent = parent.parent;		      	
-		      	var state = await this.stateFromHistory(dispatchId, journalService.getJournal(parent || dispatchId));
+		      		if(!parent){
+		      			logger.error("child workflow with no parent " + dispatchId)
+		      			throw new Error("child workflow with no parent " + dispatchId);
+		      		}
+		      	}
+		      	else{
+		      		logger.error("child workflow with no parent " + dispatchId)
+		      		throw new Error("child workflow with no parent " + dispatchId);
+		      	}
+
+		      	var state = await this.workflowStateFromHistory(theJournal);
+		      	// var state = await this.stateFromHistory(dispatchId, journalService.getJournal(parent));
+
 		      	// console.log("state2",state, dispatchId,this.workflowId,parent);
 		      	if(state.notFound){
 		      		throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
@@ -146,7 +164,7 @@ function workflow() {
 
 		      	if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 10){
 	      			logger.warn("WorkflowTimeout", this.workflowId);
-      				await journalService.getJournal(dispatchId).append({type:"WorkflowTimeout", date: new Date(),dispatchId});
+      				await theJournal.append({type:"WorkflowTimeout", date: new Date(),dispatchId});
       				throw new WorkflowDecisionScheduleWorkflow(dispatchId,name,arguments,this.constructor.name);
 	      		}
 		      	throw new WorkflowNoDecision();

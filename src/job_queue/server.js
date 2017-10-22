@@ -1,4 +1,5 @@
 const jayson = require('jayson/promise');
+import logger from '../logger';
 
 const innerQueues = {};
 
@@ -8,9 +9,10 @@ var server = jayson.server({
 		var innerQueue = innerQueues[id];
 		if(!innerQueue){
 			innerQueue = [];
-			innerQueues[id] = innerQueue;
-		}
+			innerQueues[id] = innerQueue;			
+		}		
 		innerQueue.push(job);
+		logger.log("job queue " + id + " " + innerQueue.length);
 	},
 	getJob: async function({id}){	
 		// console.log("getJob", id)	
