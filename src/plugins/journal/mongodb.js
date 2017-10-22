@@ -10,7 +10,7 @@ const plugin = {
 
 		// Connect using MongoClient
 		try{
-			db = await MongoClient.connect(url,{db:{j:true,w:'majority',wtimeout:1000,readConcern:{level:'majority'}}});
+			db = await MongoClient.connect(url,{db:{j:true,w:'majority',wtimeout:1000,readConcern:{level:'majority'}},j:true,w:'majority',wtimeout:1000,readConcern:{level:'majority'}});
 		}
 		catch(e){
 			process.exit(-1);
