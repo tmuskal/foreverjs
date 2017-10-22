@@ -94,6 +94,9 @@ var srv = {
 		var lastDecisionTaskState = "notfound"
 		var needANewDecisionTask = true;
 		var lastDecisionTaskDate;
+		if(entries.length >0 && entries[entries.length-1].type === 'Taint'){
+			return;
+		}
 		for(var i =0; i < entries.length; i++){
 			var entry = entries[i];
 			switch(entry.type){
