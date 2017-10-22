@@ -19,7 +19,7 @@ const plugin = {
 	},
 	getEntries: async function({id}){
 			var col = db.collection(id);
-			var results = await col.find({}).sort( { date: 1 } ).toArray();
+			var results = await col.find({}).sort( { date: 1 } ).readConcern("majority").toArray();
 			return results;
 	},
 	getJournals: async function({debug}){			
@@ -33,7 +33,7 @@ const plugin = {
 	},		
 	append: async function({entry,id}){			
 			var col = db.collection(id);
-			await col.insertOne(entry,{writeConcern:{j:true,w:1,wtimeout:1000}});
+			await col.insertOne(entry,{writeConcern:{j:true,w:'majority',wtimeout:1000}});
 	}
 }
 
