@@ -87,7 +87,7 @@ var srv = {
 		var entries = await journal.getEntries();
 		if(entries.length >0 && entries[entries.length-1].type === 'Taint'){
 			if(moment().diff(moment(entries[entries.length-1].date).utc(), 'seconds') < 10){
-				logger.debug('skip duplicate taint',workflowId);
+				// logger.debug('skip duplicate taint',workflowId);
 				return;				
 			}
 		}
@@ -230,7 +230,9 @@ var srv = {
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];			
 		    var state = await activityStateFromHistory(taskId,journal);	
-		    logger.debug("activity state:",task,taskId);
+		    if(!task.finished){
+				logger.debug("activity state:",task,taskId);
+			}		    
 			if(task.schedule && !task.started){
 				logger.debug("scheduled but not started");
 				if(task.failedCount > 5){
@@ -261,7 +263,9 @@ var srv = {
 			var childWorkflow = childWorkflows[childWorkflowId];
 			var childJournal = journalService.getJournal(childWorkflowId);						
 			var state = await workflowStateFromHistory(childJournal);
-			logger.debug("wf state:",childWorkflowId,childWorkflow.finished,state.last_activity);
+			if(!childWorkflow.finished){
+				logger.debug("wf state:",childWorkflowId,childWorkflow.finished,state.last_activity);
+			}			
 			if(childWorkflow.failed && childWorkflow.failedCount > 5){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
@@ -356,7 +360,7 @@ var srv = {
 		  	await journal.append({type:"DecisionTaskSchedule", date: new Date()});
 			await decisionTasks.putJob({workflowId:workflowId});
 		}
-		logger.info("Done tainting " + workflowId);
+		logger.debug("Done tainting " + workflowId);
 		// can be done periodically
 		// check for timeouts: decision task timeouts, child workflow timeouts, main workflow timeouts, activity timeouts (heartbeat, scheduletocomplete, scheduletostart, starttocomplete)
 		// check for needed dispatch for activities
