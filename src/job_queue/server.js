@@ -12,7 +12,7 @@ var server = jayson.server({
 			innerQueues[id] = innerQueue;			
 		}		
 		innerQueue.push(job);
-		logger.log("job queue " + id + " " + innerQueue.length);
+		logger.debug("job queue " + id + " " + innerQueue.length);
 	},
 	getJob: async function({id}){	
 		// console.log("getJob", id)	

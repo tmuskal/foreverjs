@@ -252,7 +252,7 @@ var srv = {
 			var childWorkflow = childWorkflows[childWorkflowId];
 			var childJournal = journalService.getJournal(childWorkflowId);						
 			var state = await workflowStateFromHistory(childJournal);
-			logger.debug("wf state:",childWorkflowId,childWorkflow);
+			logger.debug("wf state:",childWorkflowId,childWorkflow,state);
 			if(childWorkflow.failed && childWorkflow.failedCount > 5){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
@@ -327,7 +327,7 @@ var srv = {
 				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
 	      			// handle timeout
 	      			// logger.info("TimedOutActivity");
-	      			// logger.info("TimedOutWorkflow");
+	      			logger.info("TimedOutWorkflow - tainting");
       				// await journal.append({type:"TimedOutChildWorkflow", date: new Date(),dispatchId:workflowId});
       				// needANewDecisionTask=true;
 	      			await this.taint({workflowId:childWorkflowId});
