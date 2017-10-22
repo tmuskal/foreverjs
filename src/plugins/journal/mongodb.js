@@ -7,7 +7,7 @@ let db;
 // TODO: lookup between id and collection name
 const plugin = {
 	init: async function(){		
-		
+
 		// Connect using MongoClient
 		try{
 			db = await MongoClient.connect(url);
@@ -33,7 +33,7 @@ const plugin = {
 	},		
 	append: async function({entry,id}){			
 			var col = db.collection(id);
-			await col.insertOne(entry);		
+			await col.insertOne(entry,{writeConcern:{j:true,w:1,wtimeout:1000}});
 	}
 }
 
