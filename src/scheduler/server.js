@@ -83,6 +83,7 @@ var srv = {
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
 	    var parent;
+		await delay(500);
 		var entries = await journal.getEntries();
 		// console.log("entries",entries)
 		// add schedule if last activity completed or failed
@@ -252,7 +253,7 @@ var srv = {
 			var childWorkflow = childWorkflows[childWorkflowId];
 			var childJournal = journalService.getJournal(childWorkflowId);						
 			var state = await workflowStateFromHistory(childJournal);
-			logger.debug("wf state:",childWorkflowId,childWorkflow,state.last_activity);
+			logger.debug("wf state:",childWorkflowId,childWorkflow.finished,state.last_activity);
 			if(childWorkflow.failed && childWorkflow.failedCount > 5){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });

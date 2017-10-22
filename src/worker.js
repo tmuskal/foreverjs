@@ -31,13 +31,14 @@ async function DoDecisionTask(job){
 }
 async function DoActivityTask(job){
 	// console.log("need to do ", job);	
+	let instance;
 	try{
 		logger.debug("DoActivityTask " + job.taskId);
 		var journal = journalService.getJournal(job.workflowId);
 		var entries = await journal.getEntries();
 		var params = entries.find(e=>e.type == 'WorkflowStarted')
 		var classFn = workflowFactory[params.class];
-		var instance = new classFn(job.workflowId);
+		instance = new classFn(job.workflowId);
 		var dispatchId = job.taskId;
 		var paramsActivity = entries.find(e=>e.dispatchId == dispatchId);
 		instance.activityMode = true;		
