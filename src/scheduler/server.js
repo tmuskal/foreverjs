@@ -83,10 +83,11 @@ var srv = {
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
 	    var parent;
-		await delay(500);
-		var entries = await journal.getEntries();
+	    if(entries.find(e=>e.type === 'Archive'))
+			return;
+		var entries = await journal.getEntries();		
 		if(entries.length >0 && entries[entries.length-1].type === 'Taint'){
-			if(moment().diff(moment(entries[entries.length-1].date).utc(), 'seconds') < 10){
+			if(moment().diff(moment(entries[entries.length-1].date).utc(), 'seconds') < 25){
 				// logger.debug('skip duplicate taint',workflowId);
 				return;				
 			}
@@ -207,6 +208,7 @@ var srv = {
 						await parentJournal.append({type:"FinishedChildWorkflow", date: entry.date, result:entry.result, dispatchId:entry.id});
 						// await instance.scheduler.taint();
 						await taint({workflowId:parent.parent,recovery});						
+						await journal.append({type:"Archive", date: new Date()});
 					}
 					return;
 					// await journal.clear();
@@ -216,7 +218,7 @@ var srv = {
 					// needANewDecisionTask = false;										
 					// taint parent
 					// console.log("parent",parent);
-					logger.warn("Taint - FailedChildWorkflow " + workflowId);
+					logger.warn("Taint - FailedChildWorkflow " + workflowId);					
 					if(parent && parent.parent){
 	    				// console.log(parent.parent);
 						// discover parent
@@ -225,8 +227,9 @@ var srv = {
 						// console.log(classFn ,childWorkflow.class)
 						// var instance = new classFn(parent.parent);
 						// instance.parentWorkflow = workflowId;
-						await parentJournal.append({type:"FailedChildWorkflow", date: entry.date, result:entry.result, dispatchId:workflowId});
+						await parentJournal.append({type:"FailedChildWorkflow", date: entry.date, result:entry.result, dispatchId:workflowId});						
 						await taint({workflowId:parent.parent,recovery});
+						await journal.append({type:"Archive", date: new Date()});
 					}
 					return;
 					break;					
