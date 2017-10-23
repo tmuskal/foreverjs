@@ -260,6 +260,7 @@ var srv = {
 					return;
 				}
 				else{
+					await journal.append({type:"QueueActivity", date: new Date(), dispatchId:taskId});
 					await activityTasks.putJob({workflowId,taskId});
 				}
 			}
@@ -310,6 +311,7 @@ var srv = {
 					// await instance[childWorkflow.name](...Object.values(childWorkflow.args));				  	
 					await instance.journal.append({type:"WorkflowStarted", date: new Date(), args:childWorkflow.args, name:childWorkflow.name, class:childWorkflow.class, parent:workflowId});
 				  	await instance.journal.append({type:"DecisionTaskSchedule", date: new Date()});
+				  	await instance.journal.append({type:"DecisionTaskQueued", date: new Date()});
 					await decisionTasks.putJob({workflowId:childWorkflowId});
 					// console.log("res", res);
       				// instance.journal.append({type:"WorkflowComplete", date: new Date(), result:res,name:childWorkflow.name,class:childWorkflow.class,id:childWorkflowId,parent:this.workflowId});
