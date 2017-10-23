@@ -1,6 +1,8 @@
 const Sequelize = require('sequelize');
 var Promise = require('bluebird');
 import config from "../../config/config";
+import logger from '../../logger';
+
 // Connection url
 var url = config.get('SEQUELIZE_CONNECTION_STRING') || 'mongodb://localhost:27017/test2';
 let db;
@@ -28,7 +30,7 @@ const Entry = sequelize.define('entry', {
 	{		
 		fields: ['journal']
 	}],
-	createdAt: true,	
+	createdAt: 'createdAd',	
 });
 
 
@@ -39,13 +41,13 @@ const plugin = {
 			sequelize
 			  .authenticate()
 			  .then(() => {
-			    console.log('Connection has been established successfully.');
-			    return Entry.sync({})
+			    logger.info('Connection has been established successfully.');
+			    return Entry.sync({});
 			  }).then(() => {
-			  	console.log('Table created/updated');
+			  	logger.info('Table created/updated');
 				  // Table created
 			  }).catch(err => {
-				console.error('Unable to connect to the database:', err);
+				logger.error('Unable to connect to the database:', err);
 				process.exit(-1);
 			  });
 		}
@@ -53,9 +55,12 @@ const plugin = {
 			process.exit(-1);
 		}		
 	},
-	getEntries: async function({id}){
-		return await Entry.findAll({ where: { journal: id },order:[['createdAt', 'ASC']], }).then(entries=> {		  
+	getEntries: async function({id}){		
+		return await Entry.findAll({ where: { journal: id },order:[['createdAt', 'ASC']], }).then(entries=> {
+			logger.debug('data in entries',entries);
 		  return entries.map(e=>JSON.parse(e.data))
+		}).then((entries)=>{
+			logger.debug('data in entries after map',entries);
 		});
 	},
 	getJournals: async function({debug}){
@@ -64,6 +69,11 @@ const plugin = {
 		);
 	},	
 	clear: async function({id}){
+		return await Entry.destroy({
+		  where: {
+		    journal: id
+		  }
+		});
 	},		
 	append: async function({entry,id}){
 		  return await Entry.create({
