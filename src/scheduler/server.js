@@ -352,7 +352,7 @@ var srv = {
 
 			}
 			else if(!childWorkflow.finished && !childWorkflow.failed ){
-				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
+				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 2){
 	      			// handle timeout
 	      			// logger.info("TimedOutActivity");
 	      			logger.info("TimedOutWorkflow - tainting", childWorkflowId);
@@ -364,7 +364,7 @@ var srv = {
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
 	      		}
 	      		else{
-	      			await taint({workflowId:childWorkflowId,recovery});
+	      			// await taint({workflowId:childWorkflowId,recovery});
 	      		}
 				// logger.info("may need to taint workflow " + childWorkflowId);
 				// await this.taint({workflowId:childWorkflowId});
