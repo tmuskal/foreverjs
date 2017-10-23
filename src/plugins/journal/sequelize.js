@@ -4,7 +4,12 @@ import config from "../../config/config";
 // Connection url
 var url = config.get('SEQUELIZE_CONNECTION_STRING') || 'mongodb://localhost:27017/test2';
 let db;
-const sequelize = new Sequelize(url);
+const sequelize = new Sequelize(url ,{
+
+  // disable logging; default: console.log
+  logging: false
+
+});
 
 const Entry = sequelize.define('entry', {
 	createdAt: Sequelize.DATE,
