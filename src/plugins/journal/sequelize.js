@@ -30,7 +30,7 @@ const Entry = sequelize.define('entry', {
 	{		
 		fields: ['journal']
 	}],
-	createdAt: 'createdAd',	
+	createdAt: 'createdAt',	
 });
 
 
@@ -56,7 +56,7 @@ const plugin = {
 		}		
 	},
 	getEntries: async function({id}){		
-		return Entry.findAll({ where: { journal: id },order:[['createdAt']] }).then(entries=> {
+		return Entry.findAll({ where: { journal: id },order:[['id']] }).then(entries=> {
 			// logger.debug('data in entries',id,entries,entries.length);
 		  	return entries.map(e=>JSON.parse(e.data))
 		}).then((entries)=>{

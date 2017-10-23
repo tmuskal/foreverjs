@@ -28,7 +28,7 @@ async function run({className,name,args,id}){
 		// 	await delay(1000);
 		// 	return await run({className,name,args,id});
 		// }
-		await srv.taint({id});
+		await srv.taint({workflowId:id,recovery});
 
 		logger.info(e);
 		throw e;
