@@ -263,7 +263,7 @@ var srv = {
 				}
 			}
 			else if(state.started){					
-	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 5){
+	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 15){
 	      			// handle timeout
 	      			logger.info("TimedOutActivity");
       				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});
