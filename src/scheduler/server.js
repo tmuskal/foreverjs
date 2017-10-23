@@ -249,15 +249,14 @@ var srv = {
 				logger.debug("activity state:",task,taskId);
 			}
 			if(task.schedule && !task.started){
-				logger.debug("scheduled but not started");
 				if(task.failedCount > 5){
 					// fail entire workflow
+					logger.debug("task failed 5 time. failing workflow", workflowId);
       				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' });
 					await taint({workflowId,recovery});
 					return;
 				}
 				else{
-					logger.debug("put job",taskId);
 					await activityTasks.putJob({workflowId,taskId});
 				}
 			}
