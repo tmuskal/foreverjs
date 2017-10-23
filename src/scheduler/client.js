@@ -19,8 +19,8 @@ class Scheduler{
 	async signal(signalId,result){
 		return (await client.request('signal', {workflowId:this.workflowId,result,signalId})).result;
 	}
-	async taint(recovery){
-		return (await client.request('taint', {workflowId:this.workflowId,recovery})).result;
+	async taint(data = {}){
+		return (await client.request('taint', {workflowId:this.workflowId,recovery:data.recovery})).result;
 	}
 }
 class SchedulerService{

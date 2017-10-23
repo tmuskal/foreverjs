@@ -373,7 +373,7 @@ var srv = {
 				// await this.taint({workflowId:childWorkflowId});
 			}
 		}
-		if(needANewDecisionTask && lastDecisionTaskState !== 'queue'){
+		if((needANewDecisionTask || recovery) && lastDecisionTaskState !== 'queue'){
 		  	await journal.append({type:"DecisionTaskSchedule", date: new Date()});
 			await decisionTasks.putJob({workflowId:workflowId});
 		}
