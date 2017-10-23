@@ -134,7 +134,9 @@ var srv = {
 					break;					
 				case "DecisionTaskSchedule":
 					lastDecisionTaskState = "schedule";
-					// needANewDecisionTask = false;
+					if(!recovery){
+						needANewDecisionTask = false;
+					}
 					break;
 				case "DecisionTaskQueued":
 					if(!recovery){
