@@ -83,9 +83,9 @@ var srv = {
 		var activityTasks = JobQueueServer.getJobQueue("activities");
 	    var journal = journalService.getJournal(workflowId);
 	    var parent;
+		var entries = await journal.getEntries();		
 	    if(entries.find(e=>e.type === 'Archive'))
 			return;
-		var entries = await journal.getEntries();		
 		if(entries.length >0 && entries[entries.length-1].type === 'Taint'){
 			if(moment().diff(moment(entries[entries.length-1].date).utc(), 'seconds') < 25){
 				// logger.debug('skip duplicate taint',workflowId);
