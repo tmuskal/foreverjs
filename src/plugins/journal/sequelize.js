@@ -57,10 +57,10 @@ const plugin = {
 	},
 	getEntries: async function({id}){		
 		return Entry.findAll({ where: { journal: id },order:[['createdAt']] }).then(entries=> {
-			logger.debug('data in entries',id,entries,entries.length);
+			// logger.debug('data in entries',id,entries,entries.length);
 		  	return entries.map(e=>JSON.parse(e.data))
 		}).then((entries)=>{
-			logger.debug('data in entries after map',id,entries,entries.length);
+			// logger.debug('data in entries after map',id,entries,entries.length);
 			return entries;
 		});
 	},
