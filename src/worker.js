@@ -15,8 +15,13 @@ async function DoDecisionTask(job){
 		logger.debug("DoDecisionTask " + job.workflowId);
 		var journal = journalService.getJournal(job.workflowId);
 		var entries = await journal.getEntries();
+		if(entries.find(e=>e.type === 'Archive')){
+			logger.debug("DONE - DoDecisionTask - Archives" + job.workflowId);
+			return;
+		}
 		var params = entries.find(e=>e.type === 'WorkflowStarted')
 		if(!params){
+			logger.warn("DONE - DoDecisionTask - no WorkflowStarted" + job.workflowId);
 			return
 		}
 		var classFn = workflowFactory[params.class];		
