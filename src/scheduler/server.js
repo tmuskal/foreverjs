@@ -24,13 +24,11 @@ async function run({className,name,args,id}){
 		return await workflow[name](...args);
 	}
 	catch(e){
-		// if (e instanceof WorkflowDecision) {
-		// 	await delay(1000);
-		// 	return await run({className,name,args,id});
-		// }
-		await srv.taint({workflowId:id,recovery:true});
-
-		logger.info(e);
+		if (e instanceof WorkflowDecision) {
+			await srv.taint({workflowId:id,recovery:true});
+			return;
+		}		
+		logger.info('run failed',e);
 		throw e;
 	}		
 }
@@ -369,7 +367,7 @@ var srv = {
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
 	      		}
 	      		else{
-	      			// await taint({workflowId:childWorkflowId,recovery});
+	      			await taint({workflowId:childWorkflowId,recovery});
 	      		}
 				// logger.info("may need to taint workflow " + childWorkflowId);
 				// await this.taint({workflowId:childWorkflowId});
