@@ -73,7 +73,9 @@ async function PeriodicDoDecisionTask(queue, worker){
 	}
 	catch(e){	
 	}	
-	PeriodicDoDecisionTask(queue, worker);
+	setTimeout(()=>{
+		PeriodicDoDecisionTask(queue, worker);
+	},0);	
 }
 async function PeriodicDoActivityTask(queue, worker){
 	if(worker.stop)
@@ -88,7 +90,10 @@ async function PeriodicDoActivityTask(queue, worker){
 	}
 	catch(e){
 	}	
-	PeriodicDoActivityTask(queue, worker);
+	setTimeout(()=>{
+		PeriodicDoActivityTask(queue, worker);
+	},0);
+	
 }	
 class Worker{
 	constructor(){
