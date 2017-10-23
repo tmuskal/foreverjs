@@ -4,6 +4,7 @@ import config from "../../config/config";
 // Connection url
 var url = config.get('SEQUELIZE_CONNECTION_STRING') || 'mongodb://localhost:27017/test2';
 let db;
+const sequelize = new Sequelize(url);
 
 const Entry = sequelize.define('entry', {
 	createdAt: Sequelize.DATE,
@@ -25,7 +26,7 @@ const Entry = sequelize.define('entry', {
 	createdAt: true,	
 });
 
-const sequelize = new Sequelize(url);
+
 // TODO: lookup between id and collection name
 const plugin = {
 	init: async function(){					
