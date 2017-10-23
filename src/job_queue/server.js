@@ -18,18 +18,19 @@ var server = jayson.server({
 	getJob: async function({id}){	
 		// console.log("getJob", id)	
 		var innerQueue = innerQueues[id];
+		let res;
 		if(innerQueue && innerQueue.length){
 			switch(process.env.QUEUE_TYPE)
 			{
 				case "random":
-					var res = innerQueue.splice(Math.floor(Math.random()*innerQueue.length), 1);
+					res = innerQueue.splice(Math.floor(Math.random()*innerQueue.length), 1);
 					if(res.length > 0)
 						return res[0];			
 					else return null;
 				case "fifo":
 					return  innerQueue.pop();
 				case "lifo":
-					var res = innerQueue.splice(0, 1);
+					res = innerQueue.splice(0, 1);
 					if(res.length > 0)
 						return res[0];
 					else return null;
