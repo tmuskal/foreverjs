@@ -1,11 +1,21 @@
 const jayson = require('jayson/promise');
-const inMemoryPlugin = require('../plugins/journal/memory').default;
-const mongoPlugin = require('../plugins/journal/mongodb').default;
 const entries = {};
-const plugin = mongoPlugin;
+let plugin={};
 
-if(process.env.ENBALE_JOURNAL)
+if(process.env.ENBALE_JOURNAL){
+	switch(process.env.JOURNAL_DB_PLUGIN){
+	case "mongo":
+		plugin =  require('../plugins/journal/mongodb').default;
+		break;	
+	case "memory":
+		plugin =  require('../plugins/journal/memory').default;
+		break;
+	case "sequelize":
+		plugin =  require('../plugins/journal/sequelize').default;
+		break;
+	}
 	plugin.init();
+}
 
 var server = jayson.server(plugin);
 
