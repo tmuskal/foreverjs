@@ -48,12 +48,12 @@ const plugin = {
 		}		
 	},
 	getEntries: async function({id}){
-		Entry.findAll({ where: { journal: id },order:[['createdAt', 'ASC']], }).then(entries=> {		  
+		return await Entry.findAll({ where: { journal: id },order:[['createdAt', 'ASC']], }).then(entries=> {		  
 		  return entries.map(e=>JSON.parse(e.data))
-		});	
+		});
 	},
 	getJournals: async function({debug}){
-		return Entry.findAll({ attributes: ['journal'], group: ["journal"]}).then(entries=>
+		return await Entry.findAll({ attributes: ['journal'], group: ["journal"]}).then(entries=>
 			entries.map(e=>e.journal)
 		);
 	},	
