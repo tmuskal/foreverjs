@@ -56,11 +56,12 @@ const plugin = {
 		}		
 	},
 	getEntries: async function({id}){		
-		return await Entry.findAll({ where: { journal: id },order:[['createdAt', 'ASC']], }).then(entries=> {
-			logger.debug('data in entries',entries);
-		  return entries.map(e=>JSON.parse(e.data))
+		return Entry.findAll({ where: { journal: id },order:[['createdAt']] }).then(entries=> {
+			logger.debug('data in entries',id,entries,entries.length);
+		  	return entries.map(e=>JSON.parse(e.data))
 		}).then((entries)=>{
-			logger.debug('data in entries after map',entries);
+			logger.debug('data in entries after map',id,entries,entries.length);
+			return entries;
 		});
 	},
 	getJournals: async function({debug}){
