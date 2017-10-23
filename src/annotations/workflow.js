@@ -59,7 +59,7 @@ function workflow() {
 				    	}
 				    	else if (e instanceof WorkflowDecisionMultipleDecisions){
 				    		if(e.decisions.filter(d=>!(d instanceof WorkflowNoDecision)).length === 0){
-				    			logger.debug("no decisions for multi " + this.workflowId);
+				    			// logger.debug("no decisions for multi " + this.workflowId);
 				    		}
 				    		return await Promise.all(e.decisions.map(decision=>handleDecision.bind(this)(decision)));
 				    	}
@@ -77,7 +77,7 @@ function workflow() {
 			  		var res = handleDecision.bind(this)(e);
 				    if (e instanceof WorkflowDecision) {
 				    	if(e instanceof WorkflowNoDecision){
-				    			logger.debug("no decisions for " + this.workflowId);
+				    			// logger.debug("no decisions for " + this.workflowId);
 				    	}
 						// complete decision task
 				    	await this.journal.append({type:"DecisionTaskComplete", date: new Date()});
