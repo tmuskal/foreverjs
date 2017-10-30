@@ -1,3 +1,5 @@
+add redis
+add locking
 fix lambda fails
 fix endless taints.
 handle decision task timeout

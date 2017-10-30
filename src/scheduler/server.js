@@ -90,8 +90,7 @@ var srv = {
 				return;				
 			}
 		}
-		await journal.append({type:"Taint", date: new Date(),entries_count:entries.length,recovery});
-		
+		await journal.append({type:"Taint", date: new Date(),entries_count:entries.length,recovery});		
 		// console.log("entries",entries)
 		// add schedule if last activity completed or failed
 		logger.debug('in taint',workflowId,entries.length);
@@ -162,9 +161,13 @@ var srv = {
 					break;	
 				case 'ScheduleChildWorkflow':
 					var failedCount = 0;
-					if(childWorkflows[entry.dispatchId])
-						failedCount = childWorkflows[entry.dispatchId].failedCount;				
-					childWorkflows[entry.dispatchId] = {schedule:true,args:entry.args, name:entry.name,class:entry.class,failedCount};
+					var finished = false;
+					if(childWorkflows[entry.dispatchId]){
+						failedCount = childWorkflows[entry.dispatchId].failedCount;
+						finished = childWorkflows[entry.dispatchId].finished;
+					}
+					if(!finished)
+						childWorkflows[entry.dispatchId] = {schedule:true,args:entry.args, name:entry.name,class:entry.class,failedCount};
 					break;
 				case 'StartChildWorkflow':
 					childWorkflows[entry.dispatchId].started = true;
