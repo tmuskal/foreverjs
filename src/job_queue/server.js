@@ -18,8 +18,9 @@ var server = jayson.server({
 	getJob: async function({id}){	
 		// console.log("getJob", id)	
 		var innerQueue = innerQueues[id];
-		let res;
+		let res;		
 		if(innerQueue && innerQueue.length){
+			logger.debug("job queue " + id + " " + innerQueue.length);
 			switch(process.env.QUEUE_TYPE)
 			{
 				case "random":
