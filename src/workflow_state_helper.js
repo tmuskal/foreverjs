@@ -14,6 +14,8 @@ async function workflowStateFromHistory(journal){
 		}
 		else if(entry.type == 'WorkflowComplete'){
 			state = {finished : true,result:entry.result};			
+			state.last_activity = entry.date;
+			return state;
 		}
 		else if(entry.type == 'WorkflowFailed'){
 			state = {failed : true,result:entry.result};			
