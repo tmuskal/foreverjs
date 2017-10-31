@@ -61,7 +61,11 @@ function activity() {
 		      	if(state.started){
 
 		      		throw new WorkflowNoDecision();
-		      	}		      	
+		      	}	
+		      	if(state.queue){
+		      		throw new WorkflowNoDecision();
+		      	}	
+		      	throw new WorkflowNoDecision();
 	      	}
 	      	
 	      };

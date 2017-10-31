@@ -107,7 +107,7 @@ function workflow() {
 		  		if(state.started){
 		  			throw new WorkflowNoDecision();
 		  		}
-	      		
+	      		throw new WorkflowNoDecision();
 		  		// convert to future
 		  	}
 		  	else if(this.innerDispatch){
@@ -130,9 +130,12 @@ function workflow() {
 		  		else if(state.started){
 		  			throw new WorkflowNoDecision();
 		  		}
+		  		else if(state.queued){
+		  			throw new WorkflowNoDecision();
+		  		}
 		  		else {
-		  			logger.warn("innerDispatch in unknown state ", state, this.workflowId);
-		  			await this.scheduler.taint();
+		  			logger.warn("innerDispatch in unknown state ", state, this.workflowId);		  			
+		  			await this.scheduler.taint();		  			
 		  		}
 		  	}
 		  	else{		  				  		

@@ -316,14 +316,7 @@ var srv = {
 				  	await instance.journal.append({type:"DecisionTaskSchedule", date: new Date()});
 				  	await instance.journal.append({type:"DecisionTaskQueued", date: new Date()});
 					await decisionTasks.putJob({workflowId:childWorkflowId});
-					// console.log("res", res);
-      				// instance.journal.append({type:"WorkflowComplete", date: new Date(), result:res,name:childWorkflow.name,class:childWorkflow.class,id:childWorkflowId,parent:this.workflowId});
 
-					// this.journal.append({type:"FinishedChildWorkflow", date: new Date(), result:res, dispatchId:childWorkflowId});
-					// instance.scheduler.taint();
-					// this.taint();
-			  		// needANewDecisionTask = true;
-			  		// throw new WorkflowNoDecision();
 		  		// }
 		  		// catch(e){
 		  		// 	if(e instanceof WorkflowDecision){
