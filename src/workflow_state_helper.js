@@ -1,7 +1,8 @@
 import logger from './logger';
 
-async function workflowStateFromHistory(journal){
-	var entries = await journal.getEntries();	
+async function workflowStateFromHistory(journal, entries){
+	if(!entries)
+		entries = await journal.getEntries();
 	var state = {notFound : true};
 
 	var timedOut = 0;

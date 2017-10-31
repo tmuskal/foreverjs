@@ -247,13 +247,12 @@ var srv = {
 		for(var i = 0; i < tasksIds.length; i++){
 			var taskId = tasksIds[i];
 			var task = tasks[taskId];			
-		    var state = await activityStateFromHistory(taskId,journal);	
-		    if(task.queued){
+		    if(task.finished)
 		    	continue;
-		    }
-		    if(!task.finished){
-				logger.debug("activity state:",task,taskId);
-			}
+		    if(task.queued)
+		    	continue;		    
+			logger.debug("activity state:",task,taskId);
+		    var state = await activityStateFromHistory(taskId,journal,entries);	
 			if(task.schedule && !task.started){
 				if(task.failedCount > 5){
 					// fail entire workflow
@@ -268,7 +267,7 @@ var srv = {
 				}
 			}
 			else if(state.started){					
-	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 15){
+	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 3){
 	      			// handle timeout
 	      			logger.info("TimedOutActivity");
       				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});
@@ -282,11 +281,12 @@ var srv = {
 		for(var i = 0; i < childWorkflowsIds.length; i++){
 			var childWorkflowId = childWorkflowsIds[i];
 			var childWorkflow = childWorkflows[childWorkflowId];
+			if(childWorkflow.finished)
+		    	continue;
 			var childJournal = journalService.getJournal(childWorkflowId);						
-			var state = await workflowStateFromHistory(childJournal);
-			if(!childWorkflow.finished){
-				logger.debug("wf state:",childWorkflowId,childWorkflow.finished,state.last_activity);
-			}			
+			// var state = await workflowStateFromHistory(childJournal);
+			var state = await activityStateFromHistory(childWorkflowId,journal,entries);
+			logger.debug("wf state:",childWorkflowId,childWorkflow.finished,state.last_activity);
 			if(childWorkflow.failed && childWorkflow.failedCount > 5){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
@@ -301,8 +301,8 @@ var srv = {
 				var classFn = workflowFactory[childWorkflow.class];
 
 				// console.log(classFn ,childWorkflow.class)
-				var instance = new classFn(childWorkflowId);
-				instance.parentWorkflow = workflowId;
+				// var instance = new classFn(childWorkflowId);
+				// instance.parentWorkflow = workflowId;
 				
 				// TODO: need to enable for retries
 				// await instance.journal.clear();		
@@ -312,9 +312,9 @@ var srv = {
 		  		// try{	  
 					// instance.innerDispatch = true;
 					// await instance[childWorkflow.name](...Object.values(childWorkflow.args));				  	
-					await instance.journal.append({type:"WorkflowStarted", date: new Date(), args:childWorkflow.args, name:childWorkflow.name, class:childWorkflow.class, parent:workflowId});
-				  	await instance.journal.append({type:"DecisionTaskSchedule", date: new Date()});
-				  	await instance.journal.append({type:"DecisionTaskQueued", date: new Date()});
+					await childJournal.append({type:"WorkflowStarted", date: new Date(), args:childWorkflow.args, name:childWorkflow.name, class:childWorkflow.class, parent:workflowId});
+				  	await childJournal.append({type:"DecisionTaskSchedule", date: new Date()});
+				  	await childJournal.append({type:"DecisionTaskQueued", date: new Date()});
 					await decisionTasks.putJob({workflowId:childWorkflowId});
 
 		  		// }
@@ -371,9 +371,9 @@ var srv = {
 				// await this.taint({workflowId:childWorkflowId});
 			}
 		}
-		if((needANewDecisionTask || recovery) && lastDecisionTaskState !== 'queue'){
+		if((needANewDecisionTask && lastDecisionTaskState !== 'queue') || recovery){
 		  	await journal.append({type:"DecisionTaskSchedule", date: new Date()});
-			await decisionTasks.putJob({workflowId:workflowId});
+			await decisionTasks.putJob({workflowId});
 		}
 		logger.debug("Done tainting " + workflowId);
 		// can be done periodically

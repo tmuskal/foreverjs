@@ -1,6 +1,7 @@
 import logger from './logger';
-async function stateFromHistory(dispatchId, journal){
-	var entries = await journal.getEntries();
+async function stateFromHistory(dispatchId, journal,entries){
+	if(!entries)
+		entries = await journal.getEntries();	
 	var state = {notFound : true};
 	var timedOut = 0;
 	var failures = 0;
