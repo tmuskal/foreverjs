@@ -54,7 +54,7 @@ async function DoActivityTask(job){
 	}
 	catch(e){
 		logger.warn(e);
-		await instance.journal.append({type:"FailedActivity", date: new Date(), dispatchId, error:e});	
+		await instance.journal.append({type:"FailedActivity", date: new Date(), dispatchId, error:e.toString()});	
 		logger.debug("FAILED - DoActivityTask " + job.taskId);
 	}
 	// console.log(instance.journal.getEntries());
