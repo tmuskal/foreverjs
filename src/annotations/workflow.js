@@ -130,7 +130,7 @@ function workflow() {
 		  		else if(state.started){
 		  			throw new WorkflowNoDecision();
 		  		}
-		  		else if(state.queued){
+		  		else if(state.queue){
 		  			throw new WorkflowNoDecision();
 		  		}
 		  		else {

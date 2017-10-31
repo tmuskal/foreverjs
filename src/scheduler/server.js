@@ -365,7 +365,7 @@ var srv = {
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
 	      		}
 	      		else{
-	      			await taint({workflowId:childWorkflowId,recovery});
+	      			// await taint({workflowId:childWorkflowId,recovery});
 	      		}
 				// logger.info("may need to taint workflow " + childWorkflowId);
 				// await this.taint({workflowId:childWorkflowId});
