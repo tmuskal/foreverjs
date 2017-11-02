@@ -1,6 +1,7 @@
 import journalService from './journal/client';
 import workflowFactory from './workflow_factory';
 import jobQueue from './job_queue/client';
+import activityStateFromHistory from './activity_state_helper'
 import logger from './logger';
 
 function delay(time) {
@@ -44,6 +45,11 @@ async function DoActivityTask(job){
 		var params = entries.find(e=>e.type == 'WorkflowStarted')
 		var classFn = workflowFactory[params.class];
 		instance = new classFn(job.workflowId);
+		var state = await activityStateFromHistory(taskId,journal,entries);
+		if(state.finished){
+			logger.debug("ALREADY DONE - DoActivityTask " + job.taskId);
+			return;
+		}
 		var dispatchId = job.taskId;
 		var paramsActivity = entries.find(e=>e.dispatchId == dispatchId);
 		instance.activityMode = true;		
