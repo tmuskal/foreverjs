@@ -45,7 +45,7 @@ async function DoActivityTask(job){
 		var params = entries.find(e=>e.type == 'WorkflowStarted')
 		var classFn = workflowFactory[params.class];
 		instance = new classFn(job.workflowId);
-		var state = await activityStateFromHistory(taskId,journal,entries);
+		var state = await activityStateFromHistory(job.taskId,journal,entries);
 		if(state.finished){
 			logger.debug("ALREADY DONE - DoActivityTask " + job.taskId);
 			return;
