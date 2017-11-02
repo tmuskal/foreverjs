@@ -74,7 +74,7 @@ function workflow() {
 				        // statements to handle TypeError exceptions
 			  		}
 			  		// console.log(e);
-			  		var res = handleDecision.bind(this)(e);
+			  		var res = await (handleDecision.bind(this)(e));
 				    if (e instanceof WorkflowDecision) {
 				    	if(e instanceof WorkflowNoDecision){
 				    			// logger.debug("no decisions for " + this.workflowId);

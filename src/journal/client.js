@@ -14,9 +14,9 @@ class Journal{
 	async clear(){
 		return (await client.request('clear', {id:this.id})).result;
 	}
-	append(entry){
+	async append(entry){
 		// console.log("journal:",this.id,entry);
-		return client.request('append',{entry, id:this.id});
+		return await client.request('append',{entry, id:this.id});
 	}
 }
 class JournalService{
