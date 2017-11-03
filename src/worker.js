@@ -22,7 +22,7 @@ async function DoDecisionTask(job){
 		}
 		var params = entries.find(e=>e.type === 'WorkflowStarted')
 		if(!params){
-			logger.warn("DONE - DoDecisionTask - no WorkflowStarted" + job.workflowId);
+			logger.warn("DONE - DoDecisionTask - no WorkflowStarted " + job.workflowId);
 			return
 		}
 		var classFn = workflowFactory[params.class];		
@@ -51,7 +51,7 @@ async function DoActivityTask(job){
 			return;
 		}
 		var dispatchId = job.taskId;
-		var paramsActivity = entries.find(e=>e.dispatchId == dispatchId);
+		var paramsActivity = entries.find(e=>e.dispatchId == dispatchId && e.type === "ScheduleActivity");
 		instance.activityMode = true;		
 		await instance.journal.append({type:"StartedActivity", date: new Date(), dispatchId, args:paramsActivity.args,name:paramsActivity.name});		
 		var res = await instance[paramsActivity.name](...Object.values(paramsActivity.args));			

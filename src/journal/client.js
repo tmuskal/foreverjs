@@ -34,8 +34,9 @@ class JournalService{
 	}
 	getJournal(id){
 		var journal = this.journals[id];
-		if(!journal){			
-			this.journals[id] = journal = new Journal(id);
+		if(!journal){
+			journal = new Journal(id);
+			// this.journals[id] = journal
 		}
 		return journal;
 	}	
