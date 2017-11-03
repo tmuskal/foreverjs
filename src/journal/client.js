@@ -7,14 +7,23 @@ var client = jayson.client.http(config.get('JOURNAL_SERVICE_ENDPOINT') || 'http:
 class Journal{
 	constructor(id){
 		this.id = id;
+		this.entries = null;
 	}
 	async getEntries(){
-		return (await client.request('getEntries', {id:this.id})).result;
+		if(!this.entries){
+			this.entries = (await client.request('getEntries', {id:this.id})).result;			
+		}
+		return this.entries;
 	}
 	async clear(){
+		this.entries = [];
 		return (await client.request('clear', {id:this.id})).result;
 	}
 	async append(entry){
+		if(!this.entries){
+			this.entries = (await client.request('getEntries', {id:this.id})).result;
+		}
+		this.entries.push({entry, id:this.id});
 		// console.log("journal:",this.id,entry);
 		return await client.request('append',{entry, id:this.id});
 	}

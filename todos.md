@@ -1,3 +1,4 @@
+add queues for taint/scheduler?
 add redis - journal and queues
 add locking - https://github.com/mike-marcacci/node-redlock
 fix lambda fails
