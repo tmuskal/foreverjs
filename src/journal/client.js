@@ -13,7 +13,7 @@ class Journal{
 		if(this.entries == null){
 			var res = (await client.request('getEntries', {id:this.id}));
 			if(res.error)
-				throw new Error(res.error);
+				throw res.error;
 			this.entries = res.result;
 		}
 		return this.entries;
@@ -22,7 +22,7 @@ class Journal{
 		this.entries = [];
 		var res = (await client.request('clear', {id:this.id}));
 		if(res.error)
-			throw new Error(res.error);		
+			throw res.error;
 		return res.result;
 	}
 	async append(entry){
@@ -33,7 +33,7 @@ class Journal{
 		// console.log("journal:",this.id,entry);
 		var res = client.request('append',{entry, id:this.id});
 		if(res.error)
-			throw new Error(res.error);		
+			throw res.error;
 		return true;
 	}
 }

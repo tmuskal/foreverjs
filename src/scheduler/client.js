@@ -16,20 +16,20 @@ class Scheduler{
 	async scheduleTimer(duration,timerId){
 		var res = (await client.request('scheduleTimer', {workflowId:this.workflowId,duration,timerId}));
 		if(res.error)
-			throw new Error(res.error);				
+			throw res.error;
 		return res.result;
 	}
 	async signal(signalId,result){
 		var res = (await client.request('signal', {workflowId:this.workflowId,result,signalId}));
 		if(res.error)
-			throw new Error(res.error);		
+			throw res.error;
 
 		return res.result;
 	}
 	async taint(data = {}){
 		var res = (await client.request('taint', {workflowId:this.workflowId,recovery:data.recovery}));
 		if(res.error)
-			throw new Error(res.error);				
+			throw res.error;
 		return res.result;
 	}
 }

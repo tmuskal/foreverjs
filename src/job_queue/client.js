@@ -9,13 +9,13 @@ class JobQueue {
 	async putJob(job){
 		var res = await client.request('putJob',{job, id:this.id});
 		if(res.error)
-			throw new Error(res.error);			
+			throw res.error;
 		return res.result;
 	}
 	async getJob(){
 		var res = await client.request('getJob',{id:this.id});		
 		if(res.error)
-			throw new Error(res.error);
+			throw res.error;
 		return res.result;
 	}
 }
