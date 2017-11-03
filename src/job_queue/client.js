@@ -6,11 +6,17 @@ class JobQueue {
 	constructor(id){
 		this.id = id;
 	}
-	putJob(job){
-		return client.request('putJob',{job, id:this.id});
+	async putJob(job){
+		var res = await client.request('putJob',{job, id:this.id});
+		if(res.error)
+			throw new Error(res.error);			
+		return res.result;
 	}
 	async getJob(){
-		return (await client.request('getJob',{id:this.id})).result;
+		var res = await client.request('getJob',{id:this.id});		
+		if(res.error)
+			throw new Error(res.error);
+		return res.result;
 	}
 }
 class JobQueueService{

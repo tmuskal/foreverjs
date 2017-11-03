@@ -10,22 +10,31 @@ class Journal{
 		this.entries = null;
 	}
 	async getEntries(){
-		if(!this.entries){
-			this.entries = (await client.request('getEntries', {id:this.id})).result;
+		if(this.entries == null){
+			var res = (await client.request('getEntries', {id:this.id}));
+			if(res.error)
+				throw new Error(res.error);
+			this.entries = res.result;
 		}
 		return this.entries;
 	}
 	async clear(){
 		this.entries = [];
-		return (await client.request('clear', {id:this.id})).result;
+		var res = (await client.request('clear', {id:this.id}));
+		if(res.error)
+			throw new Error(res.error);		
+		return res.result;
 	}
 	async append(entry){
-		this.entries = this.getEntries();
+		this.entries = await this.getEntries();
 		if(!this.entries)
 			this.entries = [];
 		this.entries.push({entry, id:this.id});
 		// console.log("journal:",this.id,entry);
-		return await client.request('append',{entry, id:this.id});
+		var res = client.request('append',{entry, id:this.id});
+		if(res.error)
+			throw new Error(res.error);		
+		return true;
 	}
 }
 class JournalService{

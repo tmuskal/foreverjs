@@ -14,13 +14,23 @@ class Scheduler{
 		this.activityTasks = JobQueueServer.getJobQueue("activities");				
 	}
 	async scheduleTimer(duration,timerId){
-		return (await client.request('scheduleTimer', {workflowId:this.workflowId,duration,timerId})).result;
+		var res = (await client.request('scheduleTimer', {workflowId:this.workflowId,duration,timerId}));
+		if(res.error)
+			throw new Error(res.error);				
+		return res.result;
 	}
 	async signal(signalId,result){
-		return (await client.request('signal', {workflowId:this.workflowId,result,signalId})).result;
+		var res = (await client.request('signal', {workflowId:this.workflowId,result,signalId}));
+		if(res.error)
+			throw new Error(res.error);		
+
+		return res.result;
 	}
 	async taint(data = {}){
-		return (await client.request('taint', {workflowId:this.workflowId,recovery:data.recovery})).result;
+		var res = (await client.request('taint', {workflowId:this.workflowId,recovery:data.recovery}));
+		if(res.error)
+			throw new Error(res.error);				
+		return res.result;
 	}
 }
 class SchedulerService{
