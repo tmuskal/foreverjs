@@ -11,7 +11,7 @@ class Journal{
 	}
 	async getEntries(){
 		if(!this.entries){
-			this.entries = (await client.request('getEntries', {id:this.id})).result;			
+			this.entries = (await client.request('getEntries', {id:this.id})).result;
 		}
 		return this.entries;
 	}
@@ -20,9 +20,9 @@ class Journal{
 		return (await client.request('clear', {id:this.id})).result;
 	}
 	async append(entry){
-		if(!this.entries){
-			this.entries = (await client.request('getEntries', {id:this.id})).result;
-		}
+		this.entries = this.getEntries();
+		if(!this.entries)
+			this.entries = [];
 		this.entries.push({entry, id:this.id});
 		// console.log("journal:",this.id,entry);
 		return await client.request('append',{entry, id:this.id});
