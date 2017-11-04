@@ -254,7 +254,7 @@ var srv = {
 			logger.debug("activity state:",task,taskId);
 		    var state = await activityStateFromHistory(taskId,journal,entries);	
 			if(task.schedule && !task.started){
-				if(task.failedCount > 5){
+				if(task.failedCount > process.env.TASK_RETRY_COUNT){
 					// fail entire workflow
 					logger.debug("task failed 5 time. failing workflow", workflowId);
       				await journal.append({type:"WorkflowFailed", date: new Date(), result:'task ' + taskId + ' failed' });
@@ -267,7 +267,7 @@ var srv = {
 				}
 			}
 			else if(state.started){					
-	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 10){
+	      		if(moment().diff(moment(state.last_activity).utc(), 'minutes') > process.env.ACTIVITY_HEARTBEAT_TIMEOUT){
 	      			// handle timeout
 	      			logger.info("TimedOutActivity");
       				await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});
@@ -287,7 +287,7 @@ var srv = {
 			// var state = await workflowStateFromHistory(childJournal);
 			var state = await activityStateFromHistory(childWorkflowId,journal,entries);
 			logger.debug("wf state:",childWorkflowId,childWorkflow.finished,state.last_activity);
-			if(childWorkflow.failed && childWorkflow.failedCount > 5){
+			if(childWorkflow.failed && childWorkflow.failedCount > WORKFLOW_RETRY_COUNT){
 				// fail entire workflow
   				await journal.append({type:"WorkflowFailed", date: new Date(), result:'workflow ' + childWorkflowId + ' failed' });
   				logger.warn("failing workflow:",workflowId);
@@ -353,7 +353,7 @@ var srv = {
 
 			}
 			else if(!childWorkflow.finished && !childWorkflow.failed ){
-				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > 2){
+				if(moment().diff(moment(state.last_activity).utc(), 'minutes') > process.env.CHILD_WORKFLOW_HEARTBEAT_TIMEOUT){
 	      			// handle timeout
 	      			// logger.info("TimedOutActivity");
 	      			logger.info("TimedOutWorkflow - tainting", childWorkflowId);
