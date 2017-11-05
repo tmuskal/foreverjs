@@ -25,7 +25,7 @@ async function DoDecisionTask(job){
 			logger.warn("DONE - DoDecisionTask - no WorkflowStarted " + job.workflowId);
 			return
 		}
-		var classFn = workflowFactory[params.class];		
+		var classFn = workflowFactory[params.class];
 		var instance = new classFn(job.workflowId);
 		instance.mainRun = true;
 		await instance[params.name](...Object.values(params.args));
@@ -64,7 +64,7 @@ async function DoActivityTask(job){
 		logger.debug("FAILED - DoActivityTask " + job.taskId);
 	}
 	// console.log(instance.journal.getEntries());
-	await instance.scheduler.taint();
+	instance.scheduler.taint();
 }	
 async function PeriodicDoDecisionTask(queue, worker){
 	if(worker.stop)

@@ -366,14 +366,14 @@ var srv = {
 	      			logger.info("TimedOutWorkflow - tainting", childWorkflowId);
       				// await journal.append({type:"TimedOutChildWorkflow", date: new Date(),dispatchId:workflowId});
       				// needANewDecisionTask=true;
-	      			taint({workflowId:childWorkflowId,recovery,external:true});
+	      			await taint({workflowId:childWorkflowId,recovery,external:true});
       				// await journal.append({type:"TimedOutActivity", date: new Date(),dispatchId:taskId});	      			
       				// needANewDecisionTask=true;
 					// throw new WorkflowDecisionScheduleActivity("HeartBeeat");
 	      		}
 	      		else{
 	      			if(recovery)
-	      			 	taint({workflowId:childWorkflowId,recovery,external:true});
+	      			 	await taint({workflowId:childWorkflowId,recovery,external:true});
 	      		}
 				// logger.info("may need to taint workflow " + childWorkflowId);
 				// await this.taint({workflowId:childWorkflowId});
