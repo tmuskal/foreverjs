@@ -85,7 +85,7 @@ function workflow() {
 
 				    }
 					// notify scheduler		
-					this.scheduler.taint();
+					await this.scheduler.taint();
 			    	return res;
 			  	}		  		
 		  	}
