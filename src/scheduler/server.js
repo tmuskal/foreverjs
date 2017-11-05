@@ -36,7 +36,7 @@ async function run({className,name,args,id}){
 async function taint({workflowId,recovery,external}){
 	var scheduler;
 	if(external){
-		scheduler = scheduler.getScheduler(workflowId);	
+		scheduler = schedulerService.getScheduler(workflowId);	
 	}
 	else 
 		scheduler = srv;
