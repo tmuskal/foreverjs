@@ -31,7 +31,7 @@ class Journal{
 			this.entries = [];
 		this.entries.push({entry, id:this.id});
 		// console.log("journal:",this.id,entry);
-		var res = client.request('append',{entry, id:this.id});
+		var res = await client.request('append',{entry, id:this.id});
 		if(res.error)
 			throw res.error;
 		return true;
