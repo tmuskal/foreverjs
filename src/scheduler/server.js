@@ -4,6 +4,7 @@ import {WorkflowDecision,WorkflowDecisionScheduleWorkflow,WorkflowDecisionSchedu
 import JobQueueServer  from '../job_queue/client';
 import workflowFactory from '../workflow_factory';
 import journalService from '../journal/client';
+import schedulerService from '../scheduler/client';
 import logger from '../logger';
 import workflowStateFromHistory from '../workflow_state_helper'
 import activityStateFromHistory from '../activity_state_helper'
@@ -32,8 +33,14 @@ async function run({className,name,args,id}){
 		throw e;
 	}		
 }
-async function taint({workflowId,recovery}){
-	return await srv.taint({workflowId,recovery});
+async function taint({workflowId,recovery,external}){
+	var scheduler;
+	if(external){
+		scheduler = scheduler.getScheduler(workflowId);	
+	}
+	else 
+		scheduler = srv;
+	return await scheduler.taint({workflowId,recovery});
 }
 
 var srv = {
