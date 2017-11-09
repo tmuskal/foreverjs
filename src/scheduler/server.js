@@ -312,7 +312,7 @@ var srv = {
 				// instance.parentWorkflow = workflowId;
 				
 				// TODO: need to enable for retries
-				await childJournal.clear();		
+				// await childJournal.clear();		
 				// await delay(1000);
 				logger.info("start child workflow " + childWorkflowId);
 		  		await journal.append({type:"StartChildWorkflow", date: new Date(), dispatchId:childWorkflowId,class:childWorkflow.class,name:childWorkflow.name});
