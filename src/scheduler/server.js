@@ -243,12 +243,24 @@ var srv = {
 					break;					
 			}
 		}
-		if(lastDecisionTaskState === 'start' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 5){
-			await journal.append({type:"DecisionTaskTimeOut", date: new Date()});
-			logger.warn("Taint - DecisionTaskTimeOut " + workflowId);
-			await taint({workflowId,recovery});
-			return;
-		}
+        if(lastDecisionTaskState === 'start' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 5){
+            await journal.append({type:"DecisionTaskTimeOut", timeout:"StartToComplete", date: new Date()});
+            logger.warn("Taint - Start DecisionTaskTimeOut " + workflowId);
+            await taint({workflowId,recovery});
+            return;
+        }
+        if(lastDecisionTaskState === 'schedule' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 15){
+            await journal.append({type:"DecisionTaskTimeOut", timeout:"ScheduleToComplete",date: new Date()});
+            logger.warn("Taint - Schedule DecisionTaskTimeOut " + workflowId);
+            await taint({workflowId,recovery});
+            return;
+        }
+        if(lastDecisionTaskState === 'queue' && moment().diff(moment(lastDecisionTaskDate).utc(), 'minutes') > 15){
+            await journal.append({type:"DecisionTaskTimeOut", timeout:"QueueToComplete",date: new Date()});
+            logger.warn("Taint - Queue DecisionTaskTimeOut " + workflowId);
+            await taint({workflowId,recovery});
+            return;
+        }
 
 		var tasksIds = Object.keys(tasks);
 		for(var i = 0; i < tasksIds.length; i++){
