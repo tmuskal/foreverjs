@@ -7,9 +7,9 @@
     "test": "babel-node test/test_basic.js",
     "test-docker": "SCHEDULER_SERVICE_ENDPOINT=http://localhost:4013 npm run test",
     "compile": "babel -d lib/ src/",
-    "prepare": "npm run compile; git commit -am progress;npm version patch;git commit -m version; git push",
+    "prepare": "npm run compile",
     "start": "babel-node src/server.js",
-    "pub": "npm publish"
+    "pub": "git commit -am progress;npm version patch;git commit -m version; git push;"
   },
   "author": "Tal Muskal <tal@musk.al>",
   "license": "ISC",
