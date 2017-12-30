@@ -1,0 +1,4 @@
+deploy:
+  provider: npm
+  email: "tmuskal@gmail.com"
+  api_key: "YOUR_AUTH_TOKEN"
