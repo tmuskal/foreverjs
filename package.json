@@ -12,7 +12,11 @@
     "pub": "git commit -am progress;npm version patch;git commit -m version; git push;"
   },
   "author": "Tal Muskal <tal@musk.al>",
-  "license": "ISC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tmuskal/foreverjs/issues"
+  },
+  "repository": "github:tmuskal/foreverjs",
   "dependencies": {
     "aws-sdk": "^2.130.0",
     "babel-cli": "^6.24.0",
