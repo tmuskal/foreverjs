@@ -9,4 +9,3 @@ cache:
     - "node_modules"
 install:
     - npm install
-script: "npm publish"
