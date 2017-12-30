@@ -9,4 +9,4 @@ cache:
     - "node_modules"
 install:
     - npm install
-script: "npm prepare"
+script: "npm run prepare"
