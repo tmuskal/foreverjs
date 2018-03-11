@@ -14,13 +14,13 @@ function initializeUtil(name, pluginName) {
     }
 
     function getUtil() {
-        const disabledPlugin = loadPlugin('disabled') || { init: {} };
+        const disabledPlugin = loadPlugin('disabled') || { init: () => {} };
         return process.env[`ENABLE_${name.toUpperCase()}`] ?
             loadPlugin(pluginName || process.env[`${name}_PLUGIN`]) || loadPlugin('default') || disabledPlugin :
             disabledPlugin;
     }
+    console.log(pluginName, plugin);
     const plugin = getUtil();
-    console.log(plugin);
     plugin.init();
     return plugin;
 }
