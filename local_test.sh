@@ -10,7 +10,7 @@ export ENABLE_LOGGER=true
 # export LOGGER_PLUGIN=console
 export ENABLE_CACHE=true
 export ENABLE_BLOB=true
-export BLOB_MIN_SIZE=10000
+export BLOB_MIN_SIZE=10000000
 export JOURNAL_DB_PLUGIN=memory 
-export QUEUE_TYPE=random
+export QUEUE_TYPE=fifo
 npm run test2

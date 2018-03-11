@@ -15,34 +15,66 @@ Object.defineProperty(Array.prototype, 'chunk', {
     }
 });
 class InnerTest extends foreverjs.WorkflowController {
-    @foreverjs.workflow()
+    @foreverjs.workflow({ cache: false })
     async s(urls) {
         var total_links = [];
-        let moreResults = await this.parallel_do(urls, this.act);
+        let moreResults = await this.parallel_do(await this.chunk(urls, 1), this.act);
+
         moreResults.forEach(links => total_links = [...total_links, ...links]);
+        console.log("*******************", total_links, moreResults, urls);
         return total_links;
     }
-    @foreverjs.activity({ cache: true })
-    async act(url) {
+    @foreverjs.activity({ cache: true, blob: true })
+    async act(urls) {
+        const url = urls[0];
+        console.log("url", url)
         return [url + "/1", url + "/2"];
+    }
+
+    @foreverjs.activity({ cache: true, blob: true })
+    async chunk(array, num) {
+        console.log("chunk array2", array);
+        return array.chunk(num);
     }
 }
 
 class MainTest extends foreverjs.WorkflowController {
     @foreverjs.workflow()
     async s(seedPages, linksPerPage) {
-        var total_links = seedPages;
-        let last_total_links = seedPages;
-        const iters = 8;
+        var total_links_all = seedPages;
+        let last_total_links_all = seedPages;
+        const iters = 2;
         for (var i = 0; i < iters - 1; i++) {
             let wf2 = new InnerTest("more" + i + this.newDispatchID());
-            let moreResults = await this.parallel_do(total_links.chunk(250), wf2.s);
-            moreResults.forEach(links => total_links = [...total_links, ...links]);
-            total_links = _.without([...new Set(total_links)], ...last_total_links);
-            last_total_links = [...new Set([...total_links, ...last_total_links])];
+
+            let moreResults = _.flatten(await this.parallel_do(await this.chunk(last_total_links_all, 250), wf2.s));
+            console.log("last_total_links_all", last_total_links_all, moreResults);
+            const { total_links, last_total_links } = await this.combine(moreResults, total_links_all, last_total_links_all);
+            console.log("combine res2", total_links, last_total_links);
+            last_total_links_all = last_total_links;
+            total_links_all = total_links;
         }
-        console.log("total_links", last_total_links.length, Math.pow(2, iters) - 1);
-        return last_total_links;
+        console.log("total_links", total_links_all, last_total_links_all, last_total_links_all.length, Math.pow(2, iters) - 1);
+        return last_total_links_all;
+    }
+
+    @foreverjs.activity({ cache: true, blob: true })
+    async combine(urllists, total_links, previous) {
+        console.log("combine", urllists, total_links, previous);
+        urllists.forEach(links => total_links = [...total_links, ...links]);
+        total_links = _.without([...new Set(total_links)], ...previous);
+        const res = {
+            total_links,
+            last_total_links: [...new Set([...total_links, ...previous])]
+        }
+        console.log("combine res", res);
+        return res;
+    }
+
+    @foreverjs.activity({ cache: true, blob: true })
+    async chunk(array, num) {
+        console.log("array", array);
+        return array.chunk(num);
     }
 }
 foreverjs.workflowFactory.MainTest = MainTest;

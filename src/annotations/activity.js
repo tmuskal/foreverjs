@@ -6,7 +6,7 @@ import blobUtil from '../utils/blob.js';
 
 function activity(options) {
 	options = options || {};
-	const { version, cache } = options;
+	const { version, cache, blob } = options;
 
 	return function decorator(target, name, descriptor) {
 		let { value, get } = descriptor;
@@ -31,7 +31,7 @@ function activity(options) {
 				}
 				const theFunc = async function() {
 					if (this.activityMode) {
-						const enableBlob = process.env.ENABLE_BLOB === 'true';
+						const enableBlob = blob;
 						const inflateBlobArguments = enableBlob ? async(argsArray) => {
 							return await Promise.all(Object.values(argsArray).map((arg) =>
 								arg._blobKey ? blobUtil.getData({ key: arg._blobKey }) : arg
