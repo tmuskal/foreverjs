@@ -5,9 +5,9 @@ function initializeUtil(name, pluginName) {
         if (!pluginName)
             return null;
         try {
-            console.log("loading", name, pluginName);
+            
             const module = require(`../plugins/${name}/${pluginName}`);
-            console.log("loaded", name, pluginName, module);
+            console.log(`loaded ../plugins/${name}/${pluginName}`);
             return module.default;
         }
         catch (e) {
@@ -17,13 +17,12 @@ function initializeUtil(name, pluginName) {
 
     function getUtil() {
         const upName = name.toUpperCase();
-        const disabledPlugin = loadPlugin('disabled') || { init: () => {} };
         return process.env[`ENABLE_${upName}`] ?
-            loadPlugin(pluginName || process.env[`${upName}_PLUGIN`]) || loadPlugin('default') || disabledPlugin :
-            disabledPlugin;
+            loadPlugin(pluginName || process.env[`${upName}_PLUGIN`]) || loadPlugin('default') || loadPlugin('disabled') || { init: () => {} }:
+            loadPlugin('disabled') || { init: () => {} };
     }
-    console.log(pluginName, plugin);
     const plugin = getUtil();
+    
     plugin.init();
     return plugin;
 }
