@@ -20,6 +20,7 @@ function initializeUtil(name, pluginName) {
             disabledPlugin;
     }
     const plugin = getUtil();
+    console.log(plugin);
     plugin.init();
     return plugin;
 }
