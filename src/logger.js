@@ -1,3 +1,3 @@
-var { Logger } = require('./utils/pluggableUtils');
+var { Logger } = require('./utils/pluggableUtils').default;
 
 export default Logger;
