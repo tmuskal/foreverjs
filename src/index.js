@@ -11,14 +11,13 @@ import schedulerClient from './scheduler/client';
 import server from './server';
 var fs = require("fs");
 
-class WorkflowLoader{
-    load(path){
+class WorkflowLoader {
+    load(path) {
         fs.readdirSync(path).forEach(function(file) {
-            require( path+ "/" + file);
+            require(path + "/" + file);
         });
     }
 }
-const workflowLoader= new WorkflowLoader();
+const workflowLoader = new WorkflowLoader();
 
-export {workflowFactory, Worker, workflow, WorkflowController, activity, schedulerClient,workflowLoader,server,lambdaActivity};
-
+export { workflowFactory, Worker, workflow, WorkflowController, activity, schedulerClient, workflowLoader, server, lambdaActivity };
