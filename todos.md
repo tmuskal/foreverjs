@@ -1,4 +1,8 @@
 big blob plugin (s3,hbase, etc) - add fast s3 replacement
+	built in caching
+	built in blob injection to activities
+	workflow and activity versioning, murmur of function code? 
+build bigger stress test	
 add hearbeat action for tasks
 make scheduler concurrently dispatch childs to other schdulers and wait.
 add queues for taint/scheduler?
@@ -17,15 +21,13 @@ tests:
 	test for recovery
 	test for timeouts
 	normal flows	
-dynamically load workflows from files ( "./workflows" in running dir) - what about packages in docker? - cp package.json and install onbuild
 job queue backend plugins
 make deployment with custom workflow easy. - discovery with scheduler, etc.
+dynamically load workflows from files ( "./workflows" in running dir) - what about packages in docker? - cp package.json and install onbuild
 scheduler client. - dynamic object that proxies calls to schduler server
 server for human job signaling
 refactor telegram bot outside of main lib
 persistence layer for graph entities. (resource manager)
 workers - different queues.
-scheduler - integrate with mesos/hadoop
-workflow and activity versioning, murmur of function code? 
+scheduler - integrate with mesos/hadoop/k8s
 refactor uses of journal.append
-
