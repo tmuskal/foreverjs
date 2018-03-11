@@ -6,7 +6,7 @@ const plugin = {
     getData: async function({ key }) {
         return entries[key];
     },
-    clear: async function({ key }) {
+    clear: async function() {
         entries = {};
     },
     setData: async function({ entry, key }) {

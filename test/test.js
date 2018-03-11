@@ -2,17 +2,17 @@ require('babel-polyfill');
 const foreverjs = require('../src/index');
 const _ = require("lodash");
 Array.range = function(n) {
-  // Array.range(5) --> [0,1,2,3,4]
-  return Array.apply(null,Array(n)).map((x,i) => i)
+    // Array.range(5) --> [0,1,2,3,4]
+    return Array.apply(null, Array(n)).map((x, i) => i)
 };
 
 Object.defineProperty(Array.prototype, 'chunk', {
-  value: function(n) {
+    value: function(n) {
 
-    // ACTUAL CODE FOR CHUNKING ARRAY:
-    return Array.range(Math.ceil(this.length/n)).map((x,i) => this.slice(i*n,i*n+n));
+        // ACTUAL CODE FOR CHUNKING ARRAY:
+        return Array.range(Math.ceil(this.length / n)).map((x, i) => this.slice(i * n, i * n + n));
 
-  }
+    }
 });
 class InnerTest extends foreverjs.WorkflowController {
     @foreverjs.workflow()
@@ -22,7 +22,7 @@ class InnerTest extends foreverjs.WorkflowController {
         moreResults.forEach(links => total_links = [...total_links, ...links]);
         return total_links;
     }
-    @foreverjs.activity()
+    @foreverjs.activity({ cache: true })
     async act(url) {
         return [url + "/1", url + "/2"];
     }
@@ -33,7 +33,7 @@ class MainTest extends foreverjs.WorkflowController {
     async s(seedPages, linksPerPage) {
         var total_links = seedPages;
         let last_total_links = seedPages;
-        const iters = 10;
+        const iters = 8;
         for (var i = 0; i < iters - 1; i++) {
             let wf2 = new InnerTest("more" + i + this.newDispatchID());
             let moreResults = await this.parallel_do(total_links.chunk(250), wf2.s);
@@ -51,19 +51,21 @@ foreverjs.workflowFactory.InnerTest = InnerTest;
 const schedulerClient = foreverjs.schedulerClient;
 async function test() {
     var dt = new Date();
-    for (var i = 0; i < 16; i++) {
-        var y = schedulerClient.run({
+    for (var i1 = 0; i1 < 16; i1++) {
+        const i = i1;
+
+        setTimeout(() => schedulerClient.run({
             className: 'MainTest',
             name: 's',
             args: [
                 [
-                    "http://example.com/test/" + i + "/" + dt.getTime().toString(),
+                    "http://example.com/test/" + i + "/",
                 ]
             ],
             id: 'F' + i
-        });
+        }), i * 1000 * 20)
     }
-    console.log("y = ", y);
+    // console.log("y = ", y);
 }
 var docker = process.env.LOCAL_MODE !== 'true';
 if (docker)
