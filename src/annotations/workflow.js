@@ -6,7 +6,9 @@ const moment = require("moment");
 
 function workflow(options) {
 	options = options || {};
-	const { version, cache } = options;
+	let { version, cache } = options;
+	if (!process.env.ENABLE_CACHE)
+		cache = false;
 	return function decorator(target, name, descriptor) {
 		// console.log("workflow init", value,target, name);
 		let { value, get } = descriptor;
@@ -32,8 +34,9 @@ function workflow(options) {
 						this.mainRun = false;
 						await this.journal.append({ type: "DecisionTaskStarted", date: new Date() });
 						try {
-							var fn = async() => await value.call(this, ...arguments);
-							var res = await (cache ? cacheUtil.getOrInvoke({ fn, key: { f: value.constructor.name.toString(), args: arguments } }) : fn());
+							const theArgs = arguments;
+							var fn = async() => await value.call(this, ...theArgs);
+							var res = await (cache ? cacheUtil.getOrInvoke({ fn, key: { c: target.constructor.name.toString(), f: value.name.toString(), args: theArgs } }) : fn());
 							await this.journal.append({ type: "DecisionTaskComplete", date: new Date() });
 							var parent = (await this.journal.getEntries()).find(e => e.type === 'WorkflowStarted').parent;
 							await this.journal.append({ type: "WorkflowComplete", date: new Date(), result: res, name: name, class: this.constructor.name, id: this.workflowId, parent });

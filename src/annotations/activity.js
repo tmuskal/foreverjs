@@ -6,8 +6,15 @@ import blobUtil from '../utils/blob.js';
 
 function activity(options) {
 	options = options || {};
-	const { version, cache, blob } = options;
-
+	let { version, cache, blob } = options;
+	if (!process.env.ENABLE_BLOB || blob === undefined || blob === null || blob === false) {
+		blob = { result: false, input: false }
+	}
+	else if (blob === true) {
+		blob = { result: true, input: true }
+	}
+	if (!process.env.ENABLE_CACHE)
+		cache = false;
 	return function decorator(target, name, descriptor) {
 		let { value, get } = descriptor;
 		target.isActivity = true;
@@ -31,28 +38,47 @@ function activity(options) {
 				}
 				const theFunc = async function() {
 					if (this.activityMode) {
-						const enableBlob = blob;
-						const inflateBlobArguments = enableBlob ? async(argsArray) => {
-							return await Promise.all(Object.values(argsArray).map((arg) =>
-								arg._blobKey ? blobUtil.getData({ key: arg._blobKey }) : arg
-							))
-						} : async(a) => a;
-						const shrinkBlobResults = enableBlob ? async(result) => {
+
+						const inflateBlobArguments = blob.input ? async(argsArray) =>
+							await Promise.all(Object.values(argsArray).map(async(arg) => {
+								if (arg._blobKey)
+									return blobUtil.getData({ key: arg._blobKey });
+								if (Array.isArray(arg))
+									return await Promise.all(arg.map(async(arg2) =>
+										arg2._blobKey ? (await blobUtil.getData({ key: arg2._blobKey })) : arg2
+									));
+								if (typeof arg === 'object') {
+									await Promise.all(Object.keys(arg).map(async(key) => {
+										const arg2 = arg[key];
+										const value = arg2._blobKey ? (await blobUtil.getData({ key: arg2._blobKey })) : arg2;
+										arg[key] = value;
+									}));
+									return arg;
+								}
+								else
+									return arg;
+							})) : async(a) => a;
+
+						const shrinkBlobResults = blob.result ? async(result) => {
 							if (Array.isArray(result))
 								return await Promise.all(result.map((arg) =>
-									blobUtil.setData({ entry: result })
+									blobUtil.setData({ entry: arg })
 								));
 							if (typeof result === 'object') {
-								await Promise.all(Object.keys(result).map((key) => {
-									result[key] = blobUtil.setData({ entry: result[key] })
+								await Promise.all(Object.keys(result).map(async(key) => {
+									result[key] = await blobUtil.setData({ entry: result[key] })
 								}));
 								return result;
 							}
 							return await blobUtil.setData({ entry: result });
-						} : async(a) => a
-
-						const fn = async() => await shrinkBlobResults(await value.call(this, ...(await inflateBlobArguments(arguments))));
-						return await (cache ? cacheUtil.getOrInvoke({ fn, key: { f: value.constructor.name.toString(), args: arguments } }) : fn());
+						} : async(a) => a;
+						const theArgs = arguments;
+						const fn = async() => {
+							const inflatedArgs = await inflateBlobArguments(theArgs);
+							// console.log("inflatedArgs", theArgs, inflatedArgs);
+							return await shrinkBlobResults(await value.call(this, ...inflatedArgs))
+						};
+						return await (cache ? cacheUtil.getOrInvoke({ fn, key: { f: value.name.toString(), args: theArgs } }) : fn());
 						// console.log("activity res",res,arguments);
 
 						// write results in journal
