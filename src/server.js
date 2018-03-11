@@ -5,22 +5,22 @@ import workerServer from './workers/server';
 import logger from './logger';
 
 function startAll(){
-    if(process.env.ENBALE_JOBQUEUE)
+    if(process.env.ENABLE_JOBQUEUE)
         jobQueueServer.listen(4002);
-    if(process.env.ENBALE_JOURNAL)
+    if(process.env.ENABLE_JOURNAL)
         journalServer.listen(4001);
-    if(process.env.ENBALE_SCHEDULER)
+    if(process.env.ENABLE_SCHEDULER)
         schedulerServer.listen(4003);
     workerServer.runAll().then(()=>logger.info("ready"));
 
 }
 function stopAll(){
     workerServer.stop = true;
-    if(process.env.ENBALE_JOURNAL)
+    if(process.env.ENABLE_JOURNAL)
         journalServer.close();
-    if(process.env.ENBALE_SCHEDULER)
+    if(process.env.ENABLE_SCHEDULER)
         schedulerServer.close();
-    if(process.env.ENBALE_JOBQUEUE)
+    if(process.env.ENABLE_JOBQUEUE)
         jobQueueServer.close();
 }
 

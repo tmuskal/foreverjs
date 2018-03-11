@@ -1,10 +1,3 @@
-var winston = require('winston');
+var { Logger } = require('./utils/pluggableUtils');
 
-export default new (winston.Logger)({
-  transports: [
-    new (winston.transports.Console)({
-      colorize: false,      
-      level: 'debug'
-    }),   
-  ]
-});
+export default Logger;
