@@ -2,10 +2,21 @@ features:
 	scheduler client - dynamic object that proxies calls to schduler server
 	docker tasks - have socket to docker. run and interact through envs/stdin/stdout/stderr errorlevel
 	kubernetes tasks - dispatch as kubernetes jobs, get notified when done - to mark as completed and taint
-	workflow and activity versioning, murmur of function code? 
 	server for human job signaling
 	persistence layer for graph entities. (resource manager)
 	workers - different queues.
+	workflow and activity versioning, murmur of function code / manual (then through env) ?
+	global trusted cache:
+		annotate cache as public
+		extract blobs
+		global cache server:
+			register lib:
+				put a .foreverjs.yaml file in your repo
+			execution flow:
+				in local dispatch
+				get object from global cache server. 
+				if !exist, execute and report results to global cache server unless it is a truster runner
+				global cache server should execute the task and verify the results: run a worker for task/workflow
 reliability:
 	ability to handle lambda fails
 	add locking - https://github.com/mike-marcacci/node-redlock
