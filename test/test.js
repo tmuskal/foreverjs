@@ -85,10 +85,10 @@ async function test() {
             name: 's',
             args: [
                 [
-                    "http://example.com/test/" + i % 6 + "/",
+                    "http://example.com/test/a" + i % 6 + "/",
                 ]
             ],
-            id: 'Y' + i
+            id: 'YY' + i
         }), i * 100 * 2)
     }
     // console.log("y = ", y);
