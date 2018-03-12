@@ -17,7 +17,7 @@ features:
 			execution flow:
 				in local dispatch
 				get object from global cache server. 
-				if !exist, execute and report results to global cache server unless it is a truster runner
+				if !exist, execute and report results to global cache server unless it is a trusted runner
 				global cache server should execute the task and dispatch the task/workflow
 				2nd phase: crypto based trust - running global cache server locally and putting a transaction in the tangle DAG/blockchain
 reliability:
