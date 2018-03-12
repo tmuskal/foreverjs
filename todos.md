@@ -1,12 +1,11 @@
 features:
-	scheduler client. - dynamic object that proxies calls to schduler server
-	docker tasks - have socket to docker/kubernetes
-	bash tasks
+	scheduler client - dynamic object that proxies calls to schduler server
+	docker tasks - have socket to docker. run and interact through envs/stdin/stdout/stderr errorlevel
+	kubernetes tasks - dispatch as kubernetes jobs, get notified when done - to mark as completed and taint
 	workflow and activity versioning, murmur of function code? 
 	server for human job signaling
 	persistence layer for graph entities. (resource manager)
 	workers - different queues.
-	scheduler - integrate with mesos/hadoop/k8s
 reliability:
 	ability to handle lambda fails
 	add locking - https://github.com/mike-marcacci/node-redlock
