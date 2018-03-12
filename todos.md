@@ -1,12 +1,12 @@
 features:
 	scheduler client - dynamic object that proxies calls to schduler server
-	docker tasks - have socket to docker. run and interact through envs/stdin/stdout/stderr errorlevel
 	tasks types:
 		kubernetes tasks - dispatch as kubernetes jobs, get notified when done - to mark as completed and taint
+		docker tasks - have socket to docker. run and interact through envs/stdin/stdout/stderr errorlevel
 		bash tasks
 	server for human job signaling
 	persistence layer for graph entities. (resource manager)
-	workflow and activity versioning, murmur of function code / manual (then through env) ?
+	workflow and activity versioning - manual (or through env)
 	global trusted cache:
 		annotate cache as public
 		extract blobs
@@ -19,7 +19,7 @@ features:
 				get object from global cache server. 
 				if !exist, execute and report results to global cache server unless it is a truster runner
 				global cache server should execute the task and dispatch the task/workflow
-				2nd phase: crypto based
+				2nd phase: crypto based trust (tangle)
 reliability:
 	ability to handle lambda fails
 	add locking - https://github.com/mike-marcacci/node-redlock
