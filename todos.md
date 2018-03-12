@@ -33,7 +33,8 @@ refactoring:
 	refactor uses of journal.append
 deployment:
 	make deployment with custom workflow easy. - discovery with scheduler, etc.
-	docker images for servers
+	docker images for servers - with CI
+	fix ci for npm package
 	helm package
 	seed repo - yeoman
 	
