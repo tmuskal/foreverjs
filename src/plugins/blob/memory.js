@@ -1,19 +1,19 @@
 const entries = {};
 
-function literalSize(value) {
-    const theType = typeof value;
-    if (theType === 'boolean') {
-        return 4;
-    }
-    else if (theType === 'string') {
-        return value.length * 2;
-    }
-    else if (theType === 'number') {
-        return 8;
-    }
-}
 
 function roughSizeOfObject(object, thresh) {
+    function literalSize(value) {
+        const theType = typeof value;
+        if (theType === 'boolean') {
+            return 4;
+        }
+        else if (theType === 'string') {
+            return value.length * 2;
+        }
+        else if (theType === 'number') {
+            return 8;
+        }
+    }
     var objectList = [];
     var stack = [object];
     var bytes = 0;
