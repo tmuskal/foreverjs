@@ -18,19 +18,17 @@ class InnerTest extends foreverjs.WorkflowController {
     @foreverjs.workflow({ cache: true })
     async s(urls) {
         var total_links = [];
-        let moreResults = await this.parallel_do(await this.chunk(urls, 1), this.act);
+        let moreResults = await this.parallel_do(await this.chunk(urls, 1024), this.act);
         moreResults.forEach(links => total_links = [...total_links, ...links]);
         // console.log("*******************", total_links, moreResults, urls);
         return total_links;
     }
     @foreverjs.activity({ cache: true, blob: true })
     async act(urls) {
-        const url = urls[0];
-        // console.log("url", url)
-        return [url + "/1", url + "/2"];
+        return _.flatten(urls.map(url => [url + "/1", url + "/2"]));
     }
 
-    @foreverjs.activity({ cache: true, blob: { result: false, input: true } })
+    @foreverjs.activity({ cache: true, blob: { result: true, input: true } })
     async chunk(array, num) {
         // console.log("chunk array2", array);
         return array.chunk(num);
@@ -45,7 +43,7 @@ class MainTest extends foreverjs.WorkflowController {
         const iters = process.env.ITERATIONS || 4;
         for (var i = 0; i < iters - 1; i++) {
             let wf2 = new InnerTest("more" + i + this.newDispatchID());
-            let moreResults = _.flatten(await this.parallel_do(await this.chunk(last_total_links_all, 250), wf2.s));
+            let moreResults = _.flatten(await this.parallel_do(await this.chunk(last_total_links_all, 2048), wf2.s));
             const { total_links, last_total_links } = await this.combine(moreResults, total_links_all, last_total_links_all);
             last_total_links_all = last_total_links;
             total_links_all = total_links;
@@ -68,7 +66,7 @@ class MainTest extends foreverjs.WorkflowController {
 
     @foreverjs.activity({
         cache: true,
-        blob: { result: false, input: true }
+        blob: { result: true, input: true }
     }) async chunk(array, num) {
         return array.chunk(num);
     }
@@ -79,7 +77,7 @@ foreverjs.workflowFactory.InnerTest = InnerTest;
 const schedulerClient = foreverjs.schedulerClient;
 async function test() {
     var dt = new Date();
-    for (var i1 = 0; i1 < 15; i1++) {
+    for (var i1 = 0; i1 < 128; i1++) {
         const i = i1;
 
         setTimeout(() => schedulerClient.run({

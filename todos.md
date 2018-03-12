@@ -1,8 +1,4 @@
-big blob plugin (s3,hbase, etc) - add fast s3 replacement
-	built in caching
-	built in blob injection to activities
-	workflow and activity versioning, murmur of function code? 
-build bigger stress test	
+workflow and activity versioning, murmur of function code? 
 add hearbeat action for tasks
 make scheduler concurrently dispatch childs to other schdulers and wait.
 add queues for taint/scheduler?

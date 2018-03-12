@@ -13,5 +13,5 @@ export ENABLE_BLOB=true
 export BLOB_MIN_SIZE=4096
 export JOURNAL_DB_PLUGIN=memory 
 export QUEUE_TYPE=random
-export ITERATIONS=12
+export ITERATIONS=15
 npm run test2
